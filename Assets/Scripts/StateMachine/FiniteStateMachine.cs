@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FiniteStateMachine : MonoBehaviour
+public class FiniteStateMachine 
 {
     private State _currentState;
     private HashSet<State> _allStates = new();

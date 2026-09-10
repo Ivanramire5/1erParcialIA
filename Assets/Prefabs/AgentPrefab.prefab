@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1814537800357361621}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.44103, y: 2, z: -0.23557}
+  m_LocalPosition: {x: -0.44103, y: 0.5, z: -0.23557}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -251,7 +251,7 @@ Transform:
   m_GameObject: {fileID: 8817718525740287828}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.31, y: 2, z: 0.918}
+  m_LocalPosition: {x: -1.31, y: 0.5, z: 0.918}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -275,10 +275,15 @@ MonoBehaviour:
   _viewRadius: 5
   _arriveRadius: 2
   _interactRadius: 1.5
-  _separationRadius: 2
+  _separationRadius: 3
   _separationWeight: 1.5
   _cohesionWeight: 1
   _alignmentWeight: 1
+  _obstacleViewDistance: 3
+  _obstacleWeight: 5
+  _obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 256
   maxHealth: 100
   currentHealth: 50
   respawnTime: 3

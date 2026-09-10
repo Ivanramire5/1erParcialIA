@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Hunter
   - InterestObject
+  - Agent
+  - Suelo
   layers:
   - Default
   - TransparentFX

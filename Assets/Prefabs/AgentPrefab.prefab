@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1814537800357361621}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.44103, y: -1.48, z: -0.23557}
+  m_LocalPosition: {x: -0.44103, y: 2, z: -0.23557}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -234,9 +234,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6395036296420432531}
+  - component: {fileID: -1656577278515874918}
   m_Layer: 0
-  m_Name: Agent
-  m_TagString: Untagged
+  m_Name: AgentPrefab
+  m_TagString: Agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -250,10 +251,34 @@ Transform:
   m_GameObject: {fileID: 8817718525740287828}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.31, y: 1.99, z: 0.918}
+  m_LocalPosition: {x: -1.31, y: 2, z: 0.918}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6347394305723562734}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1656577278515874918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8817718525740287828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a88260e4d8b1154fb2a6add0662524f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetAgent
+  _maxSpeed: 5
+  _maxClamp: 10
+  _viewRadius: 5
+  _arriveRadius: 2
+  _interactRadius: 1.5
+  _separationRadius: 2
+  _separationWeight: 1.5
+  _cohesionWeight: 1
+  _alignmentWeight: 1
+  maxHealth: 100
+  currentHealth: 50
+  respawnTime: 3

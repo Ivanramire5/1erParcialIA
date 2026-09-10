@@ -16,15 +16,18 @@ public class TargetAgent : MonoBehaviour
     [SerializeField, Range(0f, 3f)] private float _cohesionWeight = 1f;
     [SerializeField, Range(0f, 3f)] private float _alignmentWeight = 1f;
 
+    [Header("Obstacle avouidance")]
+    [SerializeField] private float _obstacleViewDistance = 3f;
+    [SerializeField] private float _obstacleWeight = 5f;
+    [SerializeField] private LayerMask _obstacleLayer;
+
     [Header("Health & Respawn")]
     public float maxHealth = 100f;
     public float currentHealth;
     public float respawnTime = 3f;
-
     private Vector3 _velocity;
     public Vector3 Velocity => _velocity;
     public bool IsDead => currentHealth <= 0;
-
     private float _initialY;
     private static readonly List<TargetAgent> _allAgents = new();
 
@@ -134,7 +137,8 @@ public class TargetAgent : MonoBehaviour
     {
         Vector3 force = CalculateSeparation(_allAgents, _separationRadius) * _separationWeight
                       + CalculateAlignment(_allAgents, _viewRadius) * _alignmentWeight
-                      + CalculateCohesion(_allAgents, _viewRadius) * _cohesionWeight;
+                      + CalculateCohesion(_allAgents, _viewRadius) * _cohesionWeight
+                      + CalculateObstacleAvoidance() * _obstacleWeight;
         force.y = 0f;
         return force;
     }
@@ -278,5 +282,17 @@ public class TargetAgent : MonoBehaviour
     private void OnDestroy()
     {
         _allAgents.Remove(this);
+    }
+
+    //Funcion para dibujar el radio de vision del agente en la escena
+    private Vector3 CalculateObstacleAvoidance()
+    {
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _obstacleViewDistance, _obstacleLayer))
+        {
+            Vector3 desired = hit.normal * _maxSpeed;
+            desired.y = 0f;
+            return CalculateSteering(desired);
+        }
+        return Vector3.zero;
     }
 }

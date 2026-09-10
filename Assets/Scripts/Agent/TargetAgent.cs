@@ -84,7 +84,7 @@ public class TargetAgent : MonoBehaviour
             transform.forward = lookDirection;
         }
 
-         transform.position = Bounds.Instance.CalculateBoundPosition(transform.position); 
+        transform.position = Bounds.Instance.CalculateBoundPosition(transform.position); 
     }
 
     private void FixVerticalPosition()

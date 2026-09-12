@@ -16,6 +16,7 @@ public class PatrolState : State
     public override void Enter()
     {
         Debug.Log("Cazador: Entrando a Patrol");
+        _agent.SetChildColor(Color.blue);
     }
 
     public override void Update()
@@ -23,10 +24,10 @@ public class PatrolState : State
         Transform aliveBoid = null;
         Transform deadBoid = null;
 
-        // 1. Sensado prioritario: evaluamos el entorno antes de tomar decisiones de movimiento
+        //  Sensado prioritario: evaluamos el entorno antes de tomar decisiones de movimiento
         _agent.SenseEnvironment(_agent._viewRadius, ref aliveBoid, ref deadBoid);
 
-        // Prioridad 1: Recolectar muertos de forma inmediata
+      
         if (deadBoid != null)
         {
             _agent.DeadTarget = deadBoid;
@@ -37,16 +38,18 @@ public class PatrolState : State
      
         bool canAttack = _agent.currentMeleeTBATimer >= _agent.MeleeTBA || _agent.currentRangeTBATimer >= _agent.RangeTBA;
 
-  
+
         if (aliveBoid != null && canAttack)
         {
             _agent.CurrentTarget = aliveBoid;
             _agent.FSM.ChangeState(_agent.Attack);
             return;
         }
+        else
+        {
 
-    
-        Patroling();
+            Patroling();
+        }
     }
 
     private void Patroling()

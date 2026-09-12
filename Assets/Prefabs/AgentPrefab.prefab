@@ -272,10 +272,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TargetAgent
   _maxSpeed: 4
-  _maxClamp: 10
-  _viewRadius: 10
+  _maxClamp: 7
+  _viewRadius: 12
   _arriveRadius: 2
   _interactRadius: 1.5
+  childRenderer: {fileID: 5752123561136065785}
   _separationRadius: 2
   _separationWeight: 1.56
   _cohesionWeight: 1.29

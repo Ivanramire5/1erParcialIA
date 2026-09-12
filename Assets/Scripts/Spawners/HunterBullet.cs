@@ -3,6 +3,7 @@ using UnityEngine;
 public class HunterBullet : MonoBehaviour
 {
     public float speed = 20f;
+   
     public float damage = 50f;
     public float lifetime = 3f; // Tiempo antes de destruirse si no choca con nada
 

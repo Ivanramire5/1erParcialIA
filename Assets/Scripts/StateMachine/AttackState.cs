@@ -4,7 +4,6 @@ public class AttackState : State
 {
     private readonly FSMAgent _agent;
     public Transform _targetBoid;
-    private float _viewRadius = 15f;
 
     public AttackState(FSMAgent agent)
     {
@@ -14,14 +13,25 @@ public class AttackState : State
     public override void Enter()
     {
         Debug.Log("Cazador: Entrando a ATTACK!");
+        _agent.SetChildColor(Color.red);
         _targetBoid = _agent.CurrentTarget;
     }
 
     public override void Update()
     {
-        if (_targetBoid == null || !IsTargetInView())
+        if (_targetBoid == null)
         {
             _agent.FSM.ChangeState(_agent.Patrol);
+            return;
+        }
+
+        TargetAgent boid = _targetBoid.GetComponent<TargetAgent>();
+
+        // 1. Si el boid ya está muerto antes de atacar, cambiar a Gather inmediatamente
+        if (boid != null && boid.IsDead)
+        {
+            _agent.DeadTarget = _targetBoid;
+            _agent.FSM.ChangeState(_agent.Gather);
             return;
         }
 
@@ -30,67 +40,52 @@ public class AttackState : State
         bool canMelee = _agent.currentMeleeTBATimer >= _agent.MeleeTBA;
         bool canRange = _agent.currentRangeTBATimer >= _agent.RangeTBA;
 
-        // Prioridad al Melee si estamos cerca y lo tenemos disponible
         if (distanceToTarget <= _agent.MeleeAttackRadius && canMelee)
         {
-            PerformMeleeAttack();
+            PerformMeleeAttack(boid);
         }
-        // Si no, verificamos si podemos disparar a distancia
         else if (distanceToTarget <= _agent.RangeAttackRadius && canRange)
         {
             PerformRangedAttack();
         }
-        // Si estamos lejos o no tenemos ataques listos, lo perseguimos
         else
         {
             PursueTarget();
         }
     }
 
-    private void PerformMeleeAttack()
+    private void PerformMeleeAttack(TargetAgent boid)
     {
         Debug.Log("¡Ataque Cuerpo a Cuerpo ejecutado!");
         _agent.currentMeleeTBATimer = 0f;
 
-        TargetAgent boid = _targetBoid.GetComponent<TargetAgent>();
         if (boid != null)
         {
-            // Daño instantáneo
+            _agent.StopVelocity();
             boid.TakeDamage(_agent.MeleeAttackDamage);
 
+            // 2. Si el golpe actual provocó la muerte, pasar a Gather
             if (boid.IsDead)
             {
                 _agent.DeadTarget = _targetBoid;
                 _agent.FSM.ChangeState(_agent.Gather);
-                return;
             }
         }
-
-        // Si sobrevive, volvemos a patrulla
-        _agent.FSM.ChangeState(_agent.Patrol);
     }
 
     private void PerformRangedAttack()
     {
         Debug.Log("¡Disparo A Distancia ejecutado!");
         _agent.currentRangeTBATimer = 0f;
-
-        // Instanciamos la bala física
+        _agent.StopVelocity();
         _agent.FireBullet(_targetBoid);
 
-        // Volvemos a patrulla de inmediato. 
-        // Cuando la bala mate al Boid, el Cazador lo verá muerto en el estado Patrol y lo irá a buscar.
-        _agent.FSM.ChangeState(_agent.Patrol);
+        PursueTarget();
     }
 
     private void PursueTarget()
     {
         _agent.SeekTo(_targetBoid.position);
-    }
-
-    private bool IsTargetInView()
-    {
-        return Vector3.Distance(_agent.transform.position, _targetBoid.position) <= _viewRadius;
     }
 
     public override void Exit()

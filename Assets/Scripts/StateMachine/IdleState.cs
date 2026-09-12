@@ -10,6 +10,7 @@ public class IdleState : State
 
     public override void Enter()
     {
+        _agent.SetChildColor(Color.gray);
         Debug.Log("Cazador: Entrando a estado IDLE");
         _timer = 0f;
     }

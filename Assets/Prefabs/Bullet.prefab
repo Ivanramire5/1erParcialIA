@@ -29,13 +29,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1047690073203459868}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.923, y: 1.095, z: -9.381}
-  m_LocalScale: {x: 0.14, y: 0.14, z: 0.14}
-  m_ConstrainProportionsScale: 1
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.00066315, y: 0.0013256, z: 0.009037}
+  m_LocalScale: {x: 0.16458401, y: 0.085283816, z: 0.84120536}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6336311741710393907
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -108,12 +108,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.4091941, y: 2.729272, z: 1.40632}
-  m_Center: {x: 0.026979085, y: 0.08524848, z: -0.012887855}
+  m_Size: {x: 1.4091941, y: 2.319759, z: 1.0905318}
+  m_Center: {x: 0.026979065, y: 0.048778854, z: 0.0220297}
 --- !u!54 &2779805974542289512
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -122,7 +122,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1047690073203459868}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 0.1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -139,8 +139,8 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
+  m_Constraints: 4
+  m_CollisionDetection: 1
 --- !u!114 &-4748388380524358248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,6 +153,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76579f31a806b0c4da3e2bdf4dc2e1d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HunterBullet
-  speed: 20
-  damage: 50
+  speed: 30
+  damage: 70
   lifetime: 3

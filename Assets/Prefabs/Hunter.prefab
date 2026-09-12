@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3018724864849219586}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: Cannon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 8944714908654881521}
   - component: {fileID: 1444476933894841947}
   - component: {fileID: 3446538364527121192}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: Gun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -155,7 +155,8 @@ GameObject:
   - component: {fileID: 258303370302681368}
   - component: {fileID: 2029925098748036046}
   - component: {fileID: -7768510329919302776}
-  m_Layer: 6
+  - component: {fileID: 7230700116101691720}
+  m_Layer: 8
   m_Name: Hunter
   m_TagString: Hunter
   m_Icon: {fileID: 0}
@@ -191,23 +192,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FSMAgent
   Speed: 5
-  _viewRadius: 15
+  _viewRadius: 11
+  obstacleViewDistance: 2
+  obstacleWeight: 5
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 256
   MeleeTBA: 2
   currentMeleeTBATimer: 0
-  MeleeAttackRadius: 2
+  MeleeAttackRadius: 3
   MeleeAttackDamage: 40
-  RangeTBA: 5
+  RangeTBA: 8
   currentRangeTBATimer: 0
-  RangeAttackRadius: 10
+  RangeAttackRadius: 8
+  childRenderer: {fileID: 3848491024969277321}
   bulletPrefab: {fileID: 1047690073203459868, guid: 1e8a3b3570640054ebafee2bd478044a, type: 3}
-  spawnBulletPoint: {fileID: 0}
+  spawnBulletPoint: {fileID: 3018724864849219586}
   maxClamp: 10
   interestObjectPrefab: {fileID: 3511885797147284625, guid: 5515d52a0309b874491c5b58d63f0697, type: 3}
   timeToSpawnObject: 15
   patrolData:
-    waypoints: []
-    transform: {fileID: 0}
-    waypointCheckDistance: 0
+    waypoints:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    transform: {fileID: 258303370302681368}
+    waypointCheckDistance: 1
   CurrentTarget: {fileID: 6395036296420432531, guid: bb48034b5553f874cb87c17e8d0b9f0b, type: 3}
   DeadTarget: {fileID: 6395036296420432531, guid: bb48034b5553f874cb87c17e8d0b9f0b, type: 3}
 --- !u!65 &-7768510329919302776
@@ -231,6 +246,33 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1.560579, z: 1}
   m_Center: {x: 0, y: 1.2632601, z: 0}
+--- !u!54 &7230700116101691720
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3858402762093502676}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 84
+  m_CollisionDetection: 0
 --- !u!1 &4391673981238993108
 GameObject:
   m_ObjectHideFlags: 0
@@ -243,7 +285,7 @@ GameObject:
   - component: {fileID: 4577738884175931302}
   - component: {fileID: 3848491024969277321}
   - component: {fileID: 8411397734020296970}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: Hunter
   m_TagString: Hunter
   m_Icon: {fileID: 0}
@@ -338,7 +380,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2

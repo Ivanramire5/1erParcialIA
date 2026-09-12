@@ -16,7 +16,7 @@ public class TargetAgent : MonoBehaviour
     [SerializeField, Range(0f, 3f)] private float _cohesionWeight = 1f;
     [SerializeField, Range(0f, 3f)] private float _alignmentWeight = 1f;
 
-    [Header("Obstacle avouidance")]
+    [Header("Obstacle Avoidance")]
     [SerializeField] private float _obstacleViewDistance = 3f;
     [SerializeField] private float _obstacleWeight = 5f;
     [SerializeField] private LayerMask _obstacleLayer;
@@ -25,10 +25,11 @@ public class TargetAgent : MonoBehaviour
     public float maxHealth = 100f;
     public float currentHealth;
     public float respawnTime = 3f;
+
     private Vector3 _velocity;
     public Vector3 Velocity => _velocity;
     public bool IsDead => currentHealth <= 0;
-    private float _initialY;
+
     private static readonly List<TargetAgent> _allAgents = new();
 
     private void Awake()
@@ -38,7 +39,6 @@ public class TargetAgent : MonoBehaviour
 
     private void Start()
     {
-        _initialY = transform.position.y;
         currentHealth = maxHealth;
         Vector3 randomVector = new(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f));
         _velocity = randomVector.normalized * _maxSpeed;
@@ -49,7 +49,6 @@ public class TargetAgent : MonoBehaviour
         if (IsDead)
         {
             _velocity = Vector3.zero;
-            FixVerticalPosition();
             return;
         }
 
@@ -79,22 +78,12 @@ public class TargetAgent : MonoBehaviour
 
         transform.position += _velocity * Time.deltaTime;
 
-        FixVerticalPosition();
-
         if (_velocity.sqrMagnitude > 0.001f)
         {
-            Vector3 lookDirection = new Vector3(_velocity.x, 0f, _velocity.z);
-            transform.forward = lookDirection;
+            transform.forward = _velocity;
         }
 
-        transform.position = Bounds.Instance.CalculateBoundPosition(transform.position); 
-    }
-
-    private void FixVerticalPosition()
-    {
-        Vector3 pos = transform.position;
-        pos.y = _initialY;
-        transform.position = pos;
+        transform.position = Bounds.Instance.CalculateBoundPosition(transform.position);
     }
 
     private void SenseEnvironment(ref Transform hunter, ref Transform closestObject)
@@ -128,18 +117,20 @@ public class TargetAgent : MonoBehaviour
             InterestObject obj = targetObject.GetComponent<InterestObject>();
             if (obj != null)
             {
-                obj.TakeDamage(10f * Time.deltaTime);
+                TakeDamage(obj.TrapDamage * Time.deltaTime);
+                obj.TakeDamage(obj.TrapDamage * Time.deltaTime);
             }
         }
     }
 
+    #region Flocking y Movimiento
     private Vector3 CalculateFlocking()
     {
         Vector3 force = CalculateSeparation(_allAgents, _separationRadius) * _separationWeight
                       + CalculateAlignment(_allAgents, _viewRadius) * _alignmentWeight
                       + CalculateCohesion(_allAgents, _viewRadius) * _cohesionWeight
                       + CalculateObstacleAvoidance() * _obstacleWeight;
-        force.y = 0f;
+
         return force;
     }
 
@@ -147,7 +138,6 @@ public class TargetAgent : MonoBehaviour
     {
         Vector3 desiredPosition = Vector3.zero;
         int count = 0;
-
         foreach (TargetAgent item in agents)
         {
             if (item == this || item.IsDead) continue;
@@ -157,10 +147,8 @@ public class TargetAgent : MonoBehaviour
                 count++;
             }
         }
-
         if (count == 0) return Vector3.zero;
         desiredPosition /= count;
-        desiredPosition.y = _initialY;
         return CalculateSeek(desiredPosition);
     }
 
@@ -168,19 +156,16 @@ public class TargetAgent : MonoBehaviour
     {
         Vector3 desired = Vector3.zero;
         int count = 0;
-
         foreach (TargetAgent item in agents)
         {
             if (item == this || item.IsDead) continue;
             if (InRange(item.transform.position, radius))
             {
                 Vector3 diff = transform.position - item.transform.position;
-                diff.y = 0f;
                 desired += diff;
                 count++;
             }
         }
-
         if (count == 0) return Vector3.zero;
         desired /= count;
         return CalculateSteering(desired.normalized * _maxSpeed);
@@ -190,19 +175,16 @@ public class TargetAgent : MonoBehaviour
     {
         Vector3 desired = Vector3.zero;
         int count = 0;
-
         foreach (TargetAgent item in agents)
         {
             if (item == this || item.IsDead) continue;
             if (InRange(item.transform.position, radius))
             {
                 Vector3 vel = item.Velocity;
-                vel.y = 0f;
                 desired += vel;
                 count++;
             }
         }
-
         if (count == 0) return Vector3.zero;
         desired /= count;
         return CalculateSteering(desired.normalized * _maxSpeed);
@@ -210,28 +192,21 @@ public class TargetAgent : MonoBehaviour
 
     private Vector3 CalculateSeek(Vector3 targetPosition)
     {
-        targetPosition.y = _initialY;
         Vector3 dir = (targetPosition - transform.position);
-        dir.y = 0f;
         Vector3 desired = dir.normalized * _maxSpeed;
         return CalculateSteering(desired);
     }
 
     private Vector3 CalculateFlee(Vector3 targetPosition)
     {
-        targetPosition.y = _initialY;
         Vector3 dir = (transform.position - targetPosition);
-        dir.y = 0f;
         Vector3 desired = dir.normalized * _maxSpeed;
         return CalculateSteering(desired);
     }
 
     private Vector3 CalculateArrive(Vector3 targetPosition)
     {
-        targetPosition.y = _initialY;
         Vector3 dir = targetPosition - transform.position;
-        dir.y = 0f;
-
         float distance = dir.magnitude;
         float speed = _maxSpeed;
 
@@ -246,53 +221,105 @@ public class TargetAgent : MonoBehaviour
 
     private Vector3 CalculateSteering(Vector3 desired)
     {
-        desired.y = 0f;
         Vector3 steering = desired - _velocity;
-        steering.y = 0f;
         return Vector3.ClampMagnitude(steering, _maxClamp) * Time.deltaTime;
+    }
+
+    private Vector3 CalculateObstacleAvoidance()
+    {
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _obstacleViewDistance, _obstacleLayer))
+        {
+            Vector3 desired = hit.normal * _maxSpeed;
+            return CalculateSteering(desired);
+        }
+        return Vector3.zero;
     }
 
     private bool InRange(Vector3 position, float radius)
     {
         Vector3 diff = position - transform.position;
-        diff.y = 0f;
         return diff.sqrMagnitude <= radius * radius;
     }
+    #endregion
 
+    #region Vida y Recolección
     public void TakeDamage(float amount)
     {
         if (IsDead) return;
+
         currentHealth -= amount;
+
+        if (IsDead)
+        {
+            OnDie();
+        }
     }
 
+
+
+
+
+    public void OnDie()
+    {
+        // El boid se detiene
+        _velocity = Vector3.zero;
+
+        // Convertimos el collider en Trigger para que balas y otros agentes lo ignoren
+        Collider col = GetComponent<Collider>();
+        if (col != null)
+        {
+            col.isTrigger = true;
+        }
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            //rb.linearVelocity = Vector3.zero;
+            //rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true; // Lo ancla totalmente en su lugar
+        }
+        Debug.Log("Un boid ha muerto. Esperando recolección.");
+    }
+
+    private void Respawn()
+    {
+        transform.position = new Vector3(Random.Range(-10f, 10f), transform.position.y, Random.Range(-10f, 10f));
+        currentHealth = maxHealth;
+        _velocity = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized * _maxSpeed;
+
+        // Vuelve a ser un obstáculo sólido
+        Collider col = GetComponent<Collider>();
+        if (col != null)
+        {
+            col.isTrigger = false;
+        }
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+        }
+        gameObject.SetActive(true);
+    }
     public void OnCollected()
     {
         gameObject.SetActive(false);
         Invoke(nameof(Respawn), respawnTime);
     }
 
-    private void Respawn()
-    {
-        transform.position = new Vector3(Random.Range(-10f, 10f), _initialY, Random.Range(-10f, 10f));
-        currentHealth = maxHealth;
-        _velocity = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized * _maxSpeed;
-        gameObject.SetActive(true);
-    }
-
     private void OnDestroy()
     {
         _allAgents.Remove(this);
     }
-
-    //Funcion para dibujar el radio de vision del agente en la escena
-    private Vector3 CalculateObstacleAvoidance()
+    #endregion
+    private void OnDrawGizmosSelected()
     {
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _obstacleViewDistance, _obstacleLayer))
-        {
-            Vector3 desired = hit.normal * _maxSpeed;
-            desired.y = 0f;
-            return CalculateSteering(desired);
-        }
-        return Vector3.zero;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, _viewRadius);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, _separationRadius);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position,_interactRadius);
     }
 }

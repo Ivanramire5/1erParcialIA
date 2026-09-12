@@ -6,9 +6,9 @@ TagManager:
   tags:
   - Hunter
   - InterestObject
-  - Agent
   - Suelo
   - Muro
+  - Boid
   layers:
   - Default
   - TransparentFX
@@ -16,8 +16,8 @@ TagManager:
   - Target
   - Water
   - UI
-  - Hunter
-  - InterestObject
+  - Prefab
+  - 
   - Muro
   - 
   - 

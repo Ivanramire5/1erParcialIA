@@ -16,6 +16,7 @@ public class GatherState : State
 
     public override void Enter()
     {
+        _agent.SetChildColor(Color.yellow);
         Debug.Log("Cazador: Entrando a GATHER");
         _deadBoid = _agent.DeadTarget;
         _gatherTimer = 0f;

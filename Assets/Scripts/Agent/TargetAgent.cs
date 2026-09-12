@@ -9,6 +9,12 @@ public class TargetAgent : MonoBehaviour
     [SerializeField] private float _viewRadius = 5f;
     [SerializeField] private float _arriveRadius = 2f;
     [SerializeField] private float _interactRadius = 1.5f;
+    [Header("Visual Settings")]
+    [SerializeField] private Renderer childRenderer;
+
+
+    private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
+    private MaterialPropertyBlock _propBlock;
 
     [Header("Flocking Values")]
     [SerializeField] private float _separationRadius = 2f;
@@ -34,7 +40,16 @@ public class TargetAgent : MonoBehaviour
 
     private void Awake()
     {
+        _propBlock = new MaterialPropertyBlock();
         _allAgents.Add(this);
+    }
+    public void SetChildColor(Color newColor)
+    {
+        if (childRenderer == null) return;
+
+        childRenderer.GetPropertyBlock(_propBlock);
+        _propBlock.SetColor(ColorPropID, newColor);
+        childRenderer.SetPropertyBlock(_propBlock);
     }
 
     private void Start()
@@ -48,6 +63,7 @@ public class TargetAgent : MonoBehaviour
     {
         if (IsDead)
         {
+            SetChildColor(Color.black);
             _velocity = Vector3.zero;
             return;
         }
@@ -60,15 +76,18 @@ public class TargetAgent : MonoBehaviour
 
         if (hunter != null)
         {
+            SetChildColor(Color.turquoise);
             steering += CalculateFlee(hunter.position) + CalculateSeparation(_allAgents, _separationRadius) * _separationWeight;
         }
         else if (closestObject != null)
         {
+            SetChildColor(Color.yellowGreen);
             steering += CalculateArrive(closestObject.position) + CalculateSeparation(_allAgents, _separationRadius) * _separationWeight;
             InteractWithObject(closestObject);
         }
         else
         {
+            SetChildColor(Color.green);
             steering += CalculateFlocking();
         }
 
@@ -254,10 +273,6 @@ public class TargetAgent : MonoBehaviour
             OnDie();
         }
     }
-
-
-
-
 
     public void OnDie()
     {

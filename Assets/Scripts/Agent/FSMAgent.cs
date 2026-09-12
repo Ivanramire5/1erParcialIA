@@ -7,6 +7,11 @@ public class FSMAgent : MonoBehaviour
     public float Speed = 5f;
     [SerializeField] public float _viewRadius;
 
+    [Header("Obstacle Avoidance")]
+    public float obstacleViewDistance = 3f;
+    public float obstacleWeight = 5f;
+    public LayerMask obstacleLayer;
+
     [Header("Ataque Cuerpo a Cuerpo")]
     public float MeleeTBA = 2f;
     public float currentMeleeTBATimer;
@@ -17,7 +22,13 @@ public class FSMAgent : MonoBehaviour
     public float RangeTBA = 5f;
     public float currentRangeTBATimer;
     public float RangeAttackRadius = 7f;
+
+    [Header("Visual Settings")]
+    [SerializeField] private Renderer childRenderer;
+
   
+    private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor"); 
+    private MaterialPropertyBlock _propBlock;
 
     [Header("Disparo Settings")]
     public GameObject bulletPrefab;
@@ -47,7 +58,32 @@ public class FSMAgent : MonoBehaviour
     // Objetivos
     public Transform CurrentTarget;
     public Transform DeadTarget;
+    private void Awake()
+    {
+        _propBlock = new MaterialPropertyBlock();
 
+        // Si no se asignó en el Inspector, busca la ruta exacta desde la raíz
+        if (childRenderer == null)
+        {
+            Transform targetChild = transform.Find("Hunter/MTRL_Hunter");
+            if (targetChild != null)
+            {
+                childRenderer = targetChild.GetComponent<Renderer>();
+            }
+            else
+            {
+                Debug.LogError("No se encontró el objeto hijo en la ruta Hunter/MTRL_Hunter");
+            }
+        }
+    }
+    public void SetChildColor(Color newColor)
+    {
+        if (childRenderer == null) return;
+
+        childRenderer.GetPropertyBlock(_propBlock);
+        _propBlock.SetColor(ColorPropID, newColor);
+        childRenderer.SetPropertyBlock(_propBlock);
+    }
     private void Start()
     {
         FSM = new FiniteStateMachine();
@@ -86,7 +122,7 @@ public class FSMAgent : MonoBehaviour
 
             // Instanciamos la bala
             GameObject bulletObj = Instantiate(bulletPrefab, spawnBulletPoint.position, Quaternion.identity);
-
+            
             // Hacemos que mire hacia donde tiene que ir
             bulletObj.transform.forward = direction;
 
@@ -111,6 +147,9 @@ public class FSMAgent : MonoBehaviour
         steering.y = 0f;
         steering = Vector3.ClampMagnitude(steering, maxClamp) * Time.deltaTime;
 
+        // Sumamos la fuerza de esquivar obstáculos al steering principal
+        steering += CalculateObstacleAvoidance() * obstacleWeight;
+
         _velocity += steering;
         _velocity.y = 0f;
         _velocity = Vector3.ClampMagnitude(_velocity, Speed);
@@ -121,6 +160,30 @@ public class FSMAgent : MonoBehaviour
         {
             transform.forward = _velocity.normalized;
         }
+    }
+
+    private Vector3 CalculateObstacleAvoidance()
+    {
+        Vector3 rayDir = _velocity.sqrMagnitude > 0.001f ? _velocity.normalized : transform.forward;
+
+        Vector3[] directions = new Vector3[]
+        {
+        rayDir,
+        Quaternion.Euler(0, 35, 0) * rayDir,
+        Quaternion.Euler(0, -35, 0) * rayDir
+        };
+
+        foreach (Vector3 dir in directions)
+        {
+            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
+            {
+                Vector3 desired = hit.normal * Speed;
+                Vector3 steering = desired - _velocity;
+                return Vector3.ClampMagnitude(steering, maxClamp) * Time.deltaTime;
+            }
+        }
+
+        return Vector3.zero;
     }
 
     public void StopVelocity()
@@ -196,5 +259,36 @@ public class FSMAgent : MonoBehaviour
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, RangeAttackRadius);
+
+
+
+        Vector3 rayDir = _velocity.sqrMagnitude > 0.001f ? _velocity.normalized : transform.forward;
+        Vector3[] directions = new Vector3[]
+        {
+        rayDir,
+        Quaternion.Euler(0, 35, 0) * rayDir,
+        Quaternion.Euler(0, -35, 0) * rayDir
+        };
+
+        foreach (Vector3 dir in directions)
+        {
+            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
+            {
+                // Rojo: Rayo bloqueado por un obstáculo y punto de impacto
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(transform.position, hit.point);
+                Gizmos.DrawWireSphere(hit.point, 0.15f);
+
+                // Dibuja la normal del impacto (dirección del rebote/fuerza)
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawRay(hit.point, hit.normal * 1.5f);
+            }
+            else
+            {
+                // Verde: Camino despejado hasta la distancia máxima de visión
+                Gizmos.color = Color.green;
+                Gizmos.DrawRay(transform.position, dir * obstacleViewDistance);
+            }
+        }
     }
 }

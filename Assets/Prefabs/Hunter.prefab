@@ -566,7 +566,7 @@ MonoBehaviour:
   currentMeleeTBATimer: 0
   MeleeAttackRadius: 3
   MeleeAttackDamage: 40
-  HitSignal: {fileID: 0}
+  HitSignal: {fileID: 1659777941412899153}
   RangeTBA: 8
   currentRangeTBATimer: 0
   RangeAttackRadius: 8
@@ -588,6 +588,7 @@ MonoBehaviour:
     - {fileID: 0}
     transform: {fileID: 258303370302681368}
     waypointCheckDistance: 1
+    waitTime: 2
   CurrentTarget: {fileID: 6395036296420432531, guid: bb48034b5553f874cb87c17e8d0b9f0b, type: 3}
   DeadTarget: {fileID: 6395036296420432531, guid: bb48034b5553f874cb87c17e8d0b9f0b, type: 3}
 --- !u!65 &-7768510329919302776

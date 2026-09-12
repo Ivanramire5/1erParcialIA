@@ -78,7 +78,7 @@ public class AttackState : State
             _agent.FSM.ChangeState(_agent.Patrol);
         }
     }
-    }
+    
 
     private void PerformRangedAttack()
     {

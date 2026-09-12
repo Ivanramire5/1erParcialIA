@@ -193,7 +193,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FSMAgent
   Speed: 5
   _viewRadius: 11
-  obstacleViewDistance: 2
+  obstacleViewDistance: 1
   obstacleWeight: 5
   obstacleLayer:
     serializedVersion: 2

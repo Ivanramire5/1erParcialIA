@@ -108,12 +108,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.4091941, y: 2.319759, z: 1.0905318}
-  m_Center: {x: 0.026979065, y: 0.048778854, z: 0.0220297}
+  m_Size: {x: 2.5920048, y: 4.503289, z: 1.0905318}
+  m_Center: {x: -0.07876943, y: 0.19927856, z: 0.0220297}
 --- !u!54 &2779805974542289512
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -154,5 +154,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HunterBullet
   speed: 30
-  damage: 70
+  damage: 105
   lifetime: 3

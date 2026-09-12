@@ -3,7 +3,7 @@ using UnityEngine;
 public class IdleState : State
 {
     private readonly FSMAgent _agent;
-    readonly float _timeToChangeToPatrol = 3f;
+    readonly float _timeToChangeToPatrol = 5f;
     float _timer = 0f;
 
     public IdleState(FSMAgent agent) => _agent = agent;

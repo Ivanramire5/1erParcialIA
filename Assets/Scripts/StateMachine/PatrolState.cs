@@ -26,7 +26,7 @@ private bool _isWaiting = false;
         Transform aliveBoid = null;
         Transform deadBoid = null;
 
-        //  Sensado prioritario: evaluamos el entorno antes de tomar decisiones de movimiento
+       
         _agent.SenseEnvironment(_agent._viewRadius, ref aliveBoid, ref deadBoid);
 
     

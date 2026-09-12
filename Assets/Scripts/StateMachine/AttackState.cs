@@ -27,7 +27,7 @@ public class AttackState : State
 
         TargetAgent boid = _targetBoid.GetComponent<TargetAgent>();
 
-        // 1. Si el boid ya est� muerto antes de atacar, cambiar a Gather inmediatamente
+       
         if (boid != null && boid.IsDead)
         {
             _agent.DeadTarget = _targetBoid;
@@ -58,7 +58,7 @@ public class AttackState : State
     {
         Debug.Log("Ataque Cuerpo a Cuerpo ejecutado!");
 
-        // ESTA ES LA CLAVE: Reiniciamos el timer. El Update de FSMAgent hará el resto.
+       
         _agent.currentMeleeTBATimer = 0f;
 
         if (boid != null)

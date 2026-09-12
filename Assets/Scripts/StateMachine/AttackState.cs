@@ -57,11 +57,14 @@ public class AttackState : State
     private void PerformMeleeAttack(TargetAgent boid)
     {
         Debug.Log("¡Ataque Cuerpo a Cuerpo ejecutado!");
+
+        // ESTA ES LA CLAVE: Reiniciamos el timer. El Update de FSMAgent hará el resto.
         _agent.currentMeleeTBATimer = 0f;
 
         if (boid != null)
         {
             _agent.StopVelocity();
+
             boid.TakeDamage(_agent.MeleeAttackDamage);
 
             // 2. Si el golpe actual provocó la muerte, pasar a Gather

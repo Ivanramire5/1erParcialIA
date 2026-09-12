@@ -1776,6 +1776,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!224 &1235848531 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1659777941412899153, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+  m_PrefabInstance: {fileID: 1054963690858285281}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1487649104
 GameObject:
   m_ObjectHideFlags: 0
@@ -2816,10 +2821,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
-      propertyPath: obstacleViewDistance
-      value: 1
+    - target: {fileID: 1659777941412899153, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 4.16
       objectReference: {fileID: 0}
+    - target: {fileID: 1659777941412899153, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 2.84
+      objectReference: {fileID: 0}
+    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: HitSignal
+      value: 
+      objectReference: {fileID: 1235848531}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: 'patrolData.waypoints.Array.data[0]'
       value: 
@@ -2852,26 +2865,33 @@ PrefabInstance:
       propertyPath: 'patrolData.waypoints.Array.data[7]'
       value: 
       objectReference: {fileID: 1095164201}
+    - target: {fileID: 2438552631481246904, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_fontSize
+      value: 23.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 2438552631481246904, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 23.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 3179325050754208445, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3214856073927569471, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3858402762093502676, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: m_Name
       value: Hunter
       objectReference: {fileID: 0}
-    - target: {fileID: 7230700116101691720, guid: 91f7700308951b241a47df0b595a7820, type: 3}
-      propertyPath: m_UseGravity
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7230700116101691720, guid: 91f7700308951b241a47df0b595a7820, type: 3}
-      propertyPath: m_IsKinematic
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7230700116101691720, guid: 91f7700308951b241a47df0b595a7820, type: 3}
-      propertyPath: m_ExcludeLayers.m_Bits
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3214856073927569471, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 91f7700308951b241a47df0b595a7820, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

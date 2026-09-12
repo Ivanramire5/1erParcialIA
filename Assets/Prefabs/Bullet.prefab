@@ -154,5 +154,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HunterBullet
   speed: 30
-  damage: 105
+  damage: 70
   lifetime: 3

@@ -17,6 +17,7 @@ public class FSMAgent : MonoBehaviour
     public float currentMeleeTBATimer;
     public float MeleeAttackRadius = 2f;
     public float MeleeAttackDamage = 40f;
+    public RectTransform HitSignal;
 
     [Header("Ataque a Distancia")]
     public float RangeTBA = 5f;
@@ -26,8 +27,7 @@ public class FSMAgent : MonoBehaviour
     [Header("Visual Settings")]
     [SerializeField] private Renderer childRenderer;
 
-  
-    private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor"); 
+    private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
     private MaterialPropertyBlock _propBlock;
 
     [Header("Disparo Settings")]
@@ -58,6 +58,7 @@ public class FSMAgent : MonoBehaviour
     // Objetivos
     public Transform CurrentTarget;
     public Transform DeadTarget;
+
     private void Awake()
     {
         _propBlock = new MaterialPropertyBlock();
@@ -76,6 +77,7 @@ public class FSMAgent : MonoBehaviour
             }
         }
     }
+
     public void SetChildColor(Color newColor)
     {
         if (childRenderer == null) return;
@@ -84,6 +86,7 @@ public class FSMAgent : MonoBehaviour
         _propBlock.SetColor(ColorPropID, newColor);
         childRenderer.SetPropertyBlock(_propBlock);
     }
+
     private void Start()
     {
         FSM = new FiniteStateMachine();
@@ -110,6 +113,12 @@ public class FSMAgent : MonoBehaviour
         currentRangeTBATimer += Time.deltaTime;
 
         FSM.Update();
+
+     
+        if (HitSignal != null)
+        {
+            HitSignal.gameObject.SetActive(currentMeleeTBATimer < 1.8f);
+        }
     }
 
     #region Disparo (Ranged Attack)
@@ -117,16 +126,9 @@ public class FSMAgent : MonoBehaviour
     {
         if (bulletPrefab != null && spawnBulletPoint != null)
         {
-            // Apuntamos la dirección hacia el target
             Vector3 direction = (target.position - spawnBulletPoint.position).normalized;
-
-            // Instanciamos la bala
             GameObject bulletObj = Instantiate(bulletPrefab, spawnBulletPoint.position, Quaternion.identity);
-            
-            // Hacemos que mire hacia donde tiene que ir
             bulletObj.transform.forward = direction;
-
-         
         }
         else
         {
@@ -147,7 +149,6 @@ public class FSMAgent : MonoBehaviour
         steering.y = 0f;
         steering = Vector3.ClampMagnitude(steering, maxClamp) * Time.deltaTime;
 
-        // Sumamos la fuerza de esquivar obstáculos al steering principal
         steering += CalculateObstacleAvoidance() * obstacleWeight;
 
         _velocity += steering;
@@ -173,18 +174,14 @@ public class FSMAgent : MonoBehaviour
         Quaternion.Euler(0, -35, 0) * rayDir
         };
 
-        // Elevamos ligeramente el origen del rayo para evitar colisiones con el suelo
         Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
 
         foreach (Vector3 dir in directions)
         {
             if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
             {
-                // La velocidad deseada apunta en la dirección de la normal del muro
                 Vector3 desired = hit.normal * Speed;
                 Vector3 steering = desired - _velocity;
-
-                // Retornamos la fuerza cruda recortada por maxClamp (SIN Time.deltaTime)
                 return Vector3.ClampMagnitude(steering, maxClamp);
             }
         }
@@ -210,9 +207,7 @@ public class FSMAgent : MonoBehaviour
 
             if (_activeInterestObjects.Count < 5)
             {
-               
                 Vector3 spawnPosition = new Vector3(transform.position.x, 0.4f, transform.position.z);
-
                 GameObject newInterestObject = Instantiate(interestObjectPrefab, spawnPosition, Quaternion.identity);
                 _activeInterestObjects.Add(newInterestObject);
             }
@@ -266,8 +261,6 @@ public class FSMAgent : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, RangeAttackRadius);
 
-
-
         Vector3 rayDir = _velocity.sqrMagnitude > 0.001f ? _velocity.normalized : transform.forward;
         Vector3[] directions = new Vector3[]
         {
@@ -280,18 +273,15 @@ public class FSMAgent : MonoBehaviour
         {
             if (Physics.Raycast(transform.position, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
             {
-                // Rojo: Rayo bloqueado por un obstáculo y punto de impacto
                 Gizmos.color = Color.red;
                 Gizmos.DrawLine(transform.position, hit.point);
                 Gizmos.DrawWireSphere(hit.point, 0.15f);
 
-                // Dibuja la normal del impacto (dirección del rebote/fuerza)
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawRay(hit.point, hit.normal * 1.5f);
             }
             else
             {
-                // Verde: Camino despejado hasta la distancia máxima de visión
                 Gizmos.color = Color.green;
                 Gizmos.DrawRay(transform.position, dir * obstacleViewDistance);
             }

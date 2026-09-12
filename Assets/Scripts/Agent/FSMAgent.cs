@@ -26,7 +26,6 @@ public class FSMAgent : MonoBehaviour
     [Header("Visual Settings")]
     [SerializeField] private Renderer childRenderer;
 
-  
     private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor"); 
     private MaterialPropertyBlock _propBlock;
 
@@ -126,7 +125,7 @@ public class FSMAgent : MonoBehaviour
             // Hacemos que mire hacia donde tiene que ir
             bulletObj.transform.forward = direction;
 
-         
+
         }
         else
         {
@@ -204,7 +203,7 @@ public class FSMAgent : MonoBehaviour
 
             if (_activeInterestObjects.Count < 5)
             {
-               
+            
                 Vector3 spawnPosition = new Vector3(transform.position.x, 0.4f, transform.position.z);
 
                 GameObject newInterestObject = Instantiate(interestObjectPrefab, spawnPosition, Quaternion.identity);

@@ -27,7 +27,7 @@ public class FSMAgent : MonoBehaviour
     [Header("Visual Settings")]
     [SerializeField] private Renderer childRenderer;
 
-    private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
+private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
     private MaterialPropertyBlock _propBlock;
 
     [Header("Disparo Settings")]

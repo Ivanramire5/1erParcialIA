@@ -27,7 +27,7 @@ public class AttackState : State
 
         TargetAgent boid = _targetBoid.GetComponent<TargetAgent>();
 
-        // 1. Si el boid ya está muerto antes de atacar, cambiar a Gather inmediatamente
+        // 1. Si el boid ya estï¿½ muerto antes de atacar, cambiar a Gather inmediatamente
         if (boid != null && boid.IsDead)
         {
             _agent.DeadTarget = _targetBoid;
@@ -56,9 +56,9 @@ public class AttackState : State
 
     private void PerformMeleeAttack(TargetAgent boid)
     {
-        Debug.Log("¡Ataque Cuerpo a Cuerpo ejecutado!");
+        Debug.Log("Ataque Cuerpo a Cuerpo ejecutado!");
 
-        // ESTA ES LA CLAVE: Reiniciamos el timer. El Update de FSMAgent hará el resto.
+        // ESTA ES LA CLAVE: Reiniciamos el timer. El Update de FSMAgent harÃ¡ el resto.
         _agent.currentMeleeTBATimer = 0f;
 
         if (boid != null)
@@ -66,19 +66,23 @@ public class AttackState : State
             _agent.StopVelocity();
 
             boid.TakeDamage(_agent.MeleeAttackDamage);
-
-            // 2. Si el golpe actual provocó la muerte, pasar a Gather
-            if (boid.IsDead)
-            {
-                _agent.DeadTarget = _targetBoid;
-                _agent.FSM.ChangeState(_agent.Gather);
-            }
         }
+
+        if (boid.IsDead)
+        {
+            _agent.DeadTarget = _targetBoid;
+            _agent.FSM.ChangeState(_agent.Gather);
+        }
+        else
+        {
+            _agent.FSM.ChangeState(_agent.Patrol);
+        }
+    }
     }
 
     private void PerformRangedAttack()
     {
-        Debug.Log("¡Disparo A Distancia ejecutado!");
+        Debug.Log("Disparo A Distancia ejecutado!");
         _agent.currentRangeTBATimer = 0f;
         _agent.StopVelocity();
         _agent.FireBullet(_targetBoid);
@@ -88,7 +92,19 @@ public class AttackState : State
 
     private void PursueTarget()
     {
-        _agent.SeekTo(_targetBoid.position);
+        if (_targetBoid == null) return;
+
+        Vector3 dir = (_targetBoid.position - _agent.transform.position).normalized;
+        dir.y = 0f; 
+
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            
+            Quaternion targetRot = Quaternion.LookRotation(dir);
+            _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 10f);
+        }
+
+        _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
     }
 
     public override void Exit()

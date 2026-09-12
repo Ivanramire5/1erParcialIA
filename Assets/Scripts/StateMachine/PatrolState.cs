@@ -6,6 +6,8 @@ public class PatrolState : State
     private FSMAgent _agent;
     private PatrolData _data;
     private int _currentIndex = 0;
+    private float _waitTimer = 0f;
+private bool _isWaiting = false;
 
     public PatrolState(PatrolData data, FSMAgent agent)
     {
@@ -27,7 +29,7 @@ public class PatrolState : State
         //  Sensado prioritario: evaluamos el entorno antes de tomar decisiones de movimiento
         _agent.SenseEnvironment(_agent._viewRadius, ref aliveBoid, ref deadBoid);
 
-      
+    
         if (deadBoid != null)
         {
             _agent.DeadTarget = deadBoid;
@@ -35,7 +37,7 @@ public class PatrolState : State
             return;
         }
 
-     
+
         bool canAttack = _agent.currentMeleeTBATimer >= _agent.MeleeTBA || _agent.currentRangeTBATimer >= _agent.RangeTBA;
 
 
@@ -53,18 +55,45 @@ public class PatrolState : State
     }
 
     private void Patroling()
+{
+    Transform nextWaypoint = _data.waypoints[_currentIndex];
+
+    
+    if (_isWaiting)
     {
-        Transform nextWaypoint = _data.waypoints[_currentIndex];
-
-        if (Vector3.Distance(_agent.transform.position, nextWaypoint.position) <= _data.waypointCheckDistance)
+        _waitTimer += Time.deltaTime;
+        if (_waitTimer >= _data.waitTime)
         {
-            _currentIndex = (_currentIndex + 1) % _data.waypoints.Count;
-            nextWaypoint = _data.waypoints[_currentIndex];
-        }
 
-        _agent.SeekTo(nextWaypoint.position);
+            _isWaiting = false;
+            _waitTimer = 0f;
+            _currentIndex = (_currentIndex + 1) % _data.waypoints.Count;
+        }
+        
+
         _agent.TrySpawnInterestObject();
+        return; 
     }
+
+    if (Vector3.Distance(_agent.transform.position, nextWaypoint.position) <= _data.waypointCheckDistance)
+    {
+        _isWaiting = true;
+        return; 
+    }
+
+    Vector3 dir = (nextWaypoint.position - _agent.transform.position).normalized;
+    dir.y = 0f;
+
+    if (dir.sqrMagnitude > 0.01f)
+    {
+        Quaternion targetRot = Quaternion.LookRotation(dir);
+        _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 10f);
+    }
+    
+    _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
+
+    _agent.TrySpawnInterestObject();
+}
 
     public override void Exit()
     {

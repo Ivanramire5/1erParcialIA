@@ -1,10 +1,10 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PatrolState : State
 {
-    private FSMAgent _agent; 
-    private PatrolData _data; 
+    private FSMAgent _agent;
+    private PatrolData _data;
     private int _currentIndex = 0;
 
     public PatrolState(PatrolData data, FSMAgent agent)
@@ -15,27 +15,56 @@ public class PatrolState : State
 
     public override void Enter()
     {
-        Debug.LogError("Entre a Patrol");
+        Debug.Log("Cazador: Entrando a Patrol");
     }
 
     public override void Update()
     {
-        Transform nextWaypoint = _data.waypoints[_currentIndex];
-        
-        if (Vector3.Distance(nextWaypoint.position, _data.transform.position) <= _data.waypointCheckDistance)
+        Transform aliveBoid = null;
+        Transform deadBoid = null;
+
+        // 1. Sensado prioritario: evaluamos el entorno antes de tomar decisiones de movimiento
+        _agent.SenseEnvironment(15f, ref aliveBoid, ref deadBoid);
+
+        // Prioridad 1: Recolectar muertos de forma inmediata
+        if (deadBoid != null)
         {
-            _currentIndex = _currentIndex + 1 < _data.waypoints.Count ? _currentIndex + 1 : 0;
+            _agent.DeadTarget = deadBoid;
+            _agent.FSM.ChangeState(_agent.Gather);
+            return;
+        }
+
+     
+        bool canAttack = _agent.currentMeleeTBATimer >= _agent.MeleeTBA || _agent.currentRangeTBATimer >= _agent.RangeTBA;
+
+  
+        if (aliveBoid != null && canAttack)
+        {
+            _agent.CurrentTarget = aliveBoid;
+            _agent.FSM.ChangeState(_agent.Attack);
+            return;
+        }
+
+    
+        Patroling();
+    }
+
+    private void Patroling()
+    {
+        Transform nextWaypoint = _data.waypoints[_currentIndex];
+
+        if (Vector3.Distance(_agent.transform.position, nextWaypoint.position) <= _data.waypointCheckDistance)
+        {
+            _currentIndex = (_currentIndex + 1) % _data.waypoints.Count;
             nextWaypoint = _data.waypoints[_currentIndex];
         }
 
-        Vector3 dir = nextWaypoint.position - _data.transform.position;
-
-        _data.transform.position += _agent.Speed * Time.deltaTime * dir.normalized;
-        _data.transform.forward = dir;
+        _agent.SeekTo(nextWaypoint.position);
+        _agent.TrySpawnInterestObject();
     }
 
     public override void Exit()
     {
-        Debug.LogError("Sali de Patrol");
+        Debug.Log("Cazador: Saliendo de Patrol");
     }
 }

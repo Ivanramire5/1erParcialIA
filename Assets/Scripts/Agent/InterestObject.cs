@@ -2,7 +2,9 @@ using UnityEngine;
 
 public class InterestObject : MonoBehaviour
 {
-    public float health = 30f;
+    [SerializeField] private float _trapDamage = 30f;
+    public float TrapDamage => _trapDamage;
+    public float health = 100f;
 
     public void TakeDamage(float amount)
     {

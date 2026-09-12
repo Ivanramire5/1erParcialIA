@@ -24,7 +24,7 @@ public class PatrolState : State
         Transform deadBoid = null;
 
         // 1. Sensado prioritario: evaluamos el entorno antes de tomar decisiones de movimiento
-        _agent.SenseEnvironment(15f, ref aliveBoid, ref deadBoid);
+        _agent.SenseEnvironment(_agent._viewRadius, ref aliveBoid, ref deadBoid);
 
         // Prioridad 1: Recolectar muertos de forma inmediata
         if (deadBoid != null)

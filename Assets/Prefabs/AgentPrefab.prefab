@@ -214,7 +214,7 @@ GameObject:
   - component: {fileID: 6395036296420432531}
   - component: {fileID: 5635335583409098361}
   - component: {fileID: 7428563384577562708}
-  - component: {fileID: 3491121428222425573}
+  - component: {fileID: 665101736442069889}
   m_Layer: 6
   m_Name: AgentPrefab
   m_TagString: Boid
@@ -288,7 +288,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   respawnTime: 5
---- !u!54 &3491121428222425573
+--- !u!54 &665101736442069889
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -296,7 +296,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8817718525740287828}
   serializedVersion: 5
-  m_Mass: 3
+  m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}

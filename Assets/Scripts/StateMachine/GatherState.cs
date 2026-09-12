@@ -6,8 +6,8 @@ public class GatherState : State
     private Transform _deadBoid;
 
     private float _gatherTimer;
-    private float _timeToGather = 2.5f;
-    private float _reachDistance = 1.5f;
+    private float _timeToGather = 2f;
+    private float _reachDistance = 1.3f;
 
     public GatherState(FSMAgent agent)
     {

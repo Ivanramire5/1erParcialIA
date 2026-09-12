@@ -255,22 +255,28 @@ public class TargetAgent : MonoBehaviour
         }
     }
 
-    
 
-  
+
+
 
     public void OnDie()
     {
         // El boid se detiene
         _velocity = Vector3.zero;
 
-        // Convertimos el collider en Trigger para que el cazador no lo empuje al acercarse
+        // Convertimos el collider en Trigger para que balas y otros agentes lo ignoren
         Collider col = GetComponent<Collider>();
         if (col != null)
         {
             col.isTrigger = true;
         }
-
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            //rb.linearVelocity = Vector3.zero;
+            //rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true; // Lo ancla totalmente en su lugar
+        }
         Debug.Log("Un boid ha muerto. Esperando recolección.");
     }
 
@@ -280,13 +286,18 @@ public class TargetAgent : MonoBehaviour
         currentHealth = maxHealth;
         _velocity = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized * _maxSpeed;
 
-        // Volvemos a hacer el collider sólido cuando resucita
+        // Vuelve a ser un obstáculo sólido
         Collider col = GetComponent<Collider>();
         if (col != null)
         {
             col.isTrigger = false;
         }
 
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+        }
         gameObject.SetActive(true);
     }
     public void OnCollected()

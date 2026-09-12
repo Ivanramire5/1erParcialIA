@@ -278,10 +278,10 @@ MonoBehaviour:
   _interactRadius: 1.5
   childRenderer: {fileID: 5752123561136065785}
   _separationRadius: 2
-  _separationWeight: 1.56
-  _cohesionWeight: 1.29
-  _alignmentWeight: 1.32
-  _obstacleViewDistance: 3
+  _separationWeight: 0.5
+  _cohesionWeight: 1
+  _alignmentWeight: 2
+  _obstacleViewDistance: 5
   _obstacleWeight: 5
   _obstacleLayer:
     serializedVersion: 2

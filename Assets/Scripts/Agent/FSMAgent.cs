@@ -101,7 +101,7 @@ public class FSMAgent : MonoBehaviour
         currentMeleeTBATimer = MeleeTBA;
         currentRangeTBATimer = RangeTBA;
 
-        FSM.ChangeState(Patrol);
+        FSM.ChangeState(Idle);
     }
 
     private void Update()
@@ -173,13 +173,19 @@ public class FSMAgent : MonoBehaviour
         Quaternion.Euler(0, -35, 0) * rayDir
         };
 
+        // Elevamos ligeramente el origen del rayo para evitar colisiones con el suelo
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
+
         foreach (Vector3 dir in directions)
         {
-            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
+            if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
             {
+                // La velocidad deseada apunta en la dirección de la normal del muro
                 Vector3 desired = hit.normal * Speed;
                 Vector3 steering = desired - _velocity;
-                return Vector3.ClampMagnitude(steering, maxClamp) * Time.deltaTime;
+
+                // Retornamos la fuerza cruda recortada por maxClamp (SIN Time.deltaTime)
+                return Vector3.ClampMagnitude(steering, maxClamp);
             }
         }
 

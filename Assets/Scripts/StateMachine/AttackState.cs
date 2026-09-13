@@ -27,7 +27,7 @@ public class AttackState : State
 
         TargetAgent boid = _targetBoid.GetComponent<TargetAgent>();
 
-        // 1. Si el boid ya est� muerto antes de atacar, cambiar a Gather inmediatamente
+       
         if (boid != null && boid.IsDead)
         {
             _agent.DeadTarget = _targetBoid;
@@ -57,11 +57,16 @@ public class AttackState : State
     private void PerformMeleeAttack(TargetAgent boid)
     {
         Debug.Log("Ataque Cuerpo a Cuerpo ejecutado!");
+
+       
         _agent.currentMeleeTBATimer = 0f;
 
         if (boid != null)
-    {
-        boid.TakeDamage(_agent.MeleeAttackDamage);
+        {
+            _agent.StopVelocity();
+
+            boid.TakeDamage(_agent.MeleeAttackDamage);
+        }
 
         if (boid.IsDead)
         {
@@ -73,7 +78,7 @@ public class AttackState : State
             _agent.FSM.ChangeState(_agent.Patrol);
         }
     }
-    }
+    
 
     private void PerformRangedAttack()
     {

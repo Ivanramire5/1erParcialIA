@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5441681223947257463}
   - component: {fileID: 3589570525625070390}
   - component: {fileID: 149498243407202391}
-  m_Layer: 6
+  m_Layer: 9
   m_Name: TrapSphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 2412037294357530850}
   - component: {fileID: -2289316808053866302}
   - component: {fileID: 192540027116007614}
-  m_Layer: 6
+  m_Layer: 9
   m_Name: Trap
   m_TagString: InterestObject
   m_Icon: {fileID: 0}

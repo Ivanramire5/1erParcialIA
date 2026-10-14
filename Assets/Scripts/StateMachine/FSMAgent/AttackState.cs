@@ -25,7 +25,7 @@ public class AttackState : State
             return;
         }
 
-        TargetAgent boid = _targetBoid.GetComponent<TargetAgent>();
+        Boid boid = _targetBoid.GetComponent<Boid>();
 
        
         if (boid != null && boid.IsDead)
@@ -54,7 +54,7 @@ public class AttackState : State
         }
     }
 
-    private void PerformMeleeAttack(TargetAgent boid)
+    private void PerformMeleeAttack(Boid boid)
     {
         Debug.Log("Ataque Cuerpo a Cuerpo ejecutado!");
 

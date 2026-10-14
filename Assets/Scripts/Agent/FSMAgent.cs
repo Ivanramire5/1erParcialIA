@@ -224,7 +224,7 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
 
         foreach (Collider hit in hits)
         {
-            TargetAgent boid = hit.GetComponent<TargetAgent>();
+            Boid boid = hit.GetComponent<Boid>();
             if (boid != null)
             {
                 float dist = Vector3.Distance(transform.position, boid.transform.position);

@@ -272,6 +272,7 @@ public class TargetAgent : MonoBehaviour
         {
             OnDie();
         }
+       
     }
 
     public void OnDie()

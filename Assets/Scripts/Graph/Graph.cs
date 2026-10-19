@@ -66,7 +66,6 @@ public class Graph : MonoBehaviour
         return neighbors;
     }
 
-    // --- NUEVA FUNCIÓN PARA EL PARCIAL 2 ---
     // Enlaza la posición física del lobo o del cazador con el nodo matemático más cercano
     public Node GetClosestNode(Vector3 position)
     {

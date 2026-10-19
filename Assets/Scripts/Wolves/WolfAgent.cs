@@ -11,11 +11,11 @@ public class WolfAgent : MonoBehaviour
     public Transform HunterTarget;
     public float viewRadius = 10f;
     public float viewAngle = 90f;
-    [SerializeField] private LayerMask wallMask;
+    [SerializeField] public LayerMask WallMask;
 
     [Header("Patrulla")]
     public List<Transform> waypoints;
-    public float waypointCheckDiastance = 1f;
+    public float WaypointCheckDistance = 2f;
 
     //Estado compartido para alertar a la manada
     public static Vector3? LastKnownHunterPosition { get; private set; }
@@ -71,7 +71,7 @@ public class WolfAgent : MonoBehaviour
             if (Vector3.Angle(transform.forward, dirToHunter.normalized) <= viewAngle / 2f)
             {
                 // Chequear obstáculos con Linecast
-                if (!Physics.Linecast(transform.position, HunterTarget.position, wallMask))
+                if (!Physics.Linecast(transform.position, HunterTarget.position, WallMask))
                 {
                     hunterPos = HunterTarget.position;
                     return true;

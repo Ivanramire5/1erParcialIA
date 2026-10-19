@@ -4,7 +4,7 @@ using UnityEngine;
 public class WolfAgent : MonoBehaviour
 {
     [Header("Stats")]
-    [SerializeField] private float _speed = 3.5f;
+    [SerializeField] private float _speed = 3.5f; // Velocidad de movimiento del lobo
     public float Speed => _speed;
 
     [Header("Percepcion y referencias")]

@@ -48,11 +48,11 @@ public class Node : MonoBehaviour
     }
 
     // Utilizado por tu PathfindVisualizer para pintar el camino
-    public void ChangeColor(Color color)
-    {
-        if (_renderer != null)
-        {
-            _renderer.material.color = color;
-        }
-    }
+    //public void ChangeColor(Color color)
+    //{
+    //    if (_renderer != null)
+    //    {
+    //        _renderer.material.color = color;
+    //    }
+    //}
 }

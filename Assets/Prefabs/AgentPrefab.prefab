@@ -215,6 +215,10 @@ GameObject:
   - component: {fileID: 5635335583409098361}
   - component: {fileID: 7428563384577562708}
   - component: {fileID: 665101736442069889}
+  - component: {fileID: 7989732380228408623}
+  - component: {fileID: -9107272303467055963}
+  - component: {fileID: 1391549671756037991}
+  - component: {fileID: -327628846047230875}
   m_Layer: 6
   m_Name: AgentPrefab
   m_TagString: Boid
@@ -276,7 +280,6 @@ MonoBehaviour:
   _viewRadius: 12
   _arriveRadius: 2
   _interactRadius: 1.5
-  childRenderer: {fileID: 5752123561136065785}
   _separationRadius: 2
   _separationWeight: 0.5
   _cohesionWeight: 1
@@ -316,3 +319,72 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 84
   m_CollisionDetection: 0
+--- !u!114 &7989732380228408623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8817718525740287828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cf74fdddf1496f48aa9e7c9192ca2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ColorController
+  targetRenderer: {fileID: 5752123561136065785}
+--- !u!114 &-9107272303467055963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8817718525740287828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a43db6ca1956c964abc9a8bb9bed4bee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VisionSensor
+  _viewAngle: 270
+  _eyeHeight: 0.5
+  _hunterMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _objectMask:
+    serializedVersion: 2
+    m_Bits: 512
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 256
+--- !u!135 &1391549671756037991
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8817718525740287828}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 319
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 12
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-327628846047230875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8817718525740287828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 401d67592c2f6cd41b74efb668c4ac28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetAgentGizmos

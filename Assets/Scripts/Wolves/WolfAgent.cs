@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WolfAgent : MonoBehaviour
+public class WolfAgent : MonoBehaviour, IGizmoProvider
 {
     [Header("Stats")]
     [SerializeField] private float _speed = 3.5f; // Velocidad de movimiento del lobo
@@ -79,5 +79,10 @@ public class WolfAgent : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public IEnumerable<GizmoData> GetGizmosToDraw()
+    {
+        yield return new GizmoData(viewRadius, Color.cyan);
     }
 }

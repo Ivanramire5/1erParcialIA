@@ -143,15 +143,20 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
         Vector3 direction = targetPosition - transform.position;
         direction.y = 0f;
 
+        // Fuerza de búsqueda (Seek)
         Vector3 desired = direction.normalized * Speed;
+        Vector3 seekSteering = desired - _velocity;
+        seekSteering.y = 0f;
+        seekSteering = Vector3.ClampMagnitude(seekSteering, maxClamp);
 
-        Vector3 steering = desired - _velocity;
-        steering.y = 0f;
-        steering = Vector3.ClampMagnitude(steering, maxClamp) * Time.deltaTime;
+        // Fuerza de evasión de obstáculos
+        Vector3 obstacleSteering = CalculateObstacleAvoidance() * obstacleWeight;
 
-        steering += CalculateObstacleAvoidance() * obstacleWeight;
+        // Combinar ambas fuerzas y aplicar Time.deltaTime de forma global y consistente
+        Vector3 totalSteering = seekSteering + obstacleSteering;
+        totalSteering = Vector3.ClampMagnitude(totalSteering, maxClamp) * Time.deltaTime;
 
-        _velocity += steering;
+        _velocity += totalSteering;
         _velocity.y = 0f;
         _velocity = Vector3.ClampMagnitude(_velocity, Speed);
 
@@ -169,26 +174,32 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
 
         Vector3[] directions = new Vector3[]
         {
-        rayDir,
-        Quaternion.Euler(0, 35, 0) * rayDir,
-        Quaternion.Euler(0, -35, 0) * rayDir
+            rayDir,
+            Quaternion.Euler(0, 35, 0) * rayDir,
+            Quaternion.Euler(0, -35, 0) * rayDir
         };
 
+        // Usar la misma altura que en los Gizmos para asegurar consistencia
         Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
 
         foreach (Vector3 dir in directions)
         {
             if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
             {
-                Vector3 desired = hit.normal * Speed;
+                // Desenderezar la normal para evitar desvíos en el eje Y
+                Vector3 avoidanceDir = hit.normal;
+                avoidanceDir.y = 0f;
+
+                Vector3 desired = avoidanceDir.normalized * Speed;
                 Vector3 steering = desired - _velocity;
+                steering.y = 0f;
                 return Vector3.ClampMagnitude(steering, maxClamp);
             }
         }
 
         return Vector3.zero;
     }
-
+    
     public void StopVelocity()
     {
         _velocity = Vector3.zero;
@@ -224,7 +235,7 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
 
         foreach (Collider hit in hits)
         {
-            TargetAgent boid = hit.GetComponent<TargetAgent>();
+            Boid boid = hit.GetComponent<Boid>();
             if (boid != null)
             {
                 float dist = Vector3.Distance(transform.position, boid.transform.position);
@@ -264,17 +275,19 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
         Vector3 rayDir = _velocity.sqrMagnitude > 0.001f ? _velocity.normalized : transform.forward;
         Vector3[] directions = new Vector3[]
         {
-        rayDir,
-        Quaternion.Euler(0, 35, 0) * rayDir,
-        Quaternion.Euler(0, -35, 0) * rayDir
+            rayDir,
+            Quaternion.Euler(0, 35, 0) * rayDir,
+            Quaternion.Euler(0, -35, 0) * rayDir
         };
+
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
 
         foreach (Vector3 dir in directions)
         {
-            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
+            if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
             {
                 Gizmos.color = Color.red;
-                Gizmos.DrawLine(transform.position, hit.point);
+                Gizmos.DrawLine(rayOrigin, hit.point);
                 Gizmos.DrawWireSphere(hit.point, 0.15f);
 
                 Gizmos.color = Color.yellow;
@@ -283,7 +296,7 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
             else
             {
                 Gizmos.color = Color.green;
-                Gizmos.DrawRay(transform.position, dir * obstacleViewDistance);
+                Gizmos.DrawRay(rayOrigin, dir * obstacleViewDistance);
             }
         }
     }

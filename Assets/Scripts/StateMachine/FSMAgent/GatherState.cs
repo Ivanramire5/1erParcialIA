@@ -45,7 +45,7 @@ public class GatherState : State
             {
                 Debug.Log("Boid recolectado exitosamente.");
 
-                TargetAgent boidScript = _deadBoid.GetComponent<TargetAgent>();
+                Boid boidScript = _deadBoid.GetComponent<Boid>();
                 if (boidScript != null)
                 {
                     boidScript.OnCollected();

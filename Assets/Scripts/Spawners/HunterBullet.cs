@@ -22,7 +22,7 @@ public class HunterBullet : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
        
-        TargetAgent boid = other.GetComponent<TargetAgent>();
+        Boid boid = other.GetComponent<Boid>();
         if (boid != null && !boid.IsDead)
         {
            

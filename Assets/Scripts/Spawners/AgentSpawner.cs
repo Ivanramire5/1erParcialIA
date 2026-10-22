@@ -47,9 +47,13 @@ public class AgentSpawner : MonoBehaviour
         {
             float randomX = Random.Range(-spawnAreaWidth / 2f, spawnAreaWidth / 2f);
             float randomZ = Random.Range(-spawnAreaHeight / 2f, spawnAreaHeight / 2f);
-            
-            
-            Vector3 spawnPosition = new Vector3(randomX, alturaDeSpawn, randomZ);
+
+            // Sumamos transform.position para que respete la ubicación del Spawner
+            Vector3 spawnPosition = new Vector3(
+                transform.position.x + randomX,
+                alturaDeSpawn,
+                transform.position.z + randomZ
+            );
 
             Instantiate(Agent, spawnPosition, Quaternion.identity);
         }

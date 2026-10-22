@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(ColorController))]
-public class Boid : MonoBehaviour
+public class Boid : MonoBehaviour, IGizmoProvider
 {
     public VisionSensor Sensor { get; private set; }
 
@@ -288,5 +288,24 @@ public class Boid : MonoBehaviour
         AllAgents.Remove(this);
     }
     #endregion
-}
 
+   
+    public IEnumerable<GizmoData> GetGizmosToDraw()
+    {
+        // Radios de comportamiento (Flocking / Interacción)
+        yield return new GizmoData(_viewRadius, Color.yellow);
+        yield return new GizmoData(_separationRadius, Color.red);
+        yield return new GizmoData(_interactRadius, Color.blue);
+
+        // Si tiene un VisionSensor en los hijos, también exponemos su cono de visión
+        VisionSensor sensor = GetComponentInChildren<VisionSensor>();
+        if (sensor != null)
+        {
+            // Usamos reflexión o exponemos propiedades públicas en VisionSensor si es necesario.
+            // O directamente pasamos los datos si los haces públicos en VisionSensor:
+            // yield return new GizmoData(sensor.ViewRadius, sensor.ViewAngle, Color.green, Vector3.up * sensor.EyeHeight);
+        }
+    }
+  
+
+}

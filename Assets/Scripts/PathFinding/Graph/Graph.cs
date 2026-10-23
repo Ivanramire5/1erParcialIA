@@ -9,6 +9,8 @@ public class Graph : MonoBehaviour
 {
     public static Graph Current { get; private set; }
 
+    public List<Node> AllNodes => _nodes;
+
     [Header("Nodos del Grafo")]
     [SerializeField] private List<Node> _nodes = new();
 

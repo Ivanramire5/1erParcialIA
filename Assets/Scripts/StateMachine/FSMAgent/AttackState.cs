@@ -21,7 +21,7 @@ public class AttackState : State
     {
         if (_targetBoid == null)
         {
-            _agent.FSM.ChangeState(_agent.Patrol);
+            _agent.FSM.ChangeState(_agent.Search);
             return;
         }
 
@@ -75,7 +75,7 @@ public class AttackState : State
         }
         else
         {
-            _agent.FSM.ChangeState(_agent.Patrol);
+            _agent.FSM.ChangeState(_agent.Search);
         }
     }
     

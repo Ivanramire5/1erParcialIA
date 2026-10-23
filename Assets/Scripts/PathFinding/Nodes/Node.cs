@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
+    public bool IsExitNode = false;
     [Header("Configuración del Nodo")]
     [SerializeField] private int _cost = 1;
     public int Cost => _cost;

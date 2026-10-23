@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -18,7 +19,7 @@ public class GenericAgentGizmos : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         ResolveProvider();
         if (_gizmoProvider == null) return;
@@ -28,23 +29,27 @@ public class GenericAgentGizmos : MonoBehaviour
             Gizmos.color = gizmo.Color;
             Vector3 center = transform.position + gizmo.Offset;
 
-            if (gizmo.Type == GizmoType.WireSphere)
+            switch (gizmo.Type)
             {
-                Gizmos.DrawWireSphere(center, gizmo.Radius);
-            }
-            else if (gizmo.Type == GizmoType.VisionCone)
-            {
-                DrawVisionCone(center, gizmo.Radius, gizmo.Angle);
+                case GizmoType.WireSphere:
+                    Gizmos.DrawWireSphere(center, gizmo.Radius);
+                    break;
+
+                case GizmoType.VisionCone:
+                    DrawVisionCone(center, gizmo.Radius, gizmo.Angle);
+                    break;
+
+                case GizmoType.PathLines:
+                    DrawPathGizmos(gizmo.PathPoints, gizmo.Color);
+                    break;
             }
         }
     }
 
     private void DrawVisionCone(Vector3 position, float radius, float angle)
     {
-        // Dibuja el radio de visión base
         Gizmos.DrawWireSphere(position, radius);
 
-        // Dibuja los límites del ángulo de visión
         Quaternion leftRayRotation = Quaternion.AngleAxis(-angle * 0.5f, transform.up);
         Quaternion rightRayRotation = Quaternion.AngleAxis(angle * 0.5f, transform.up);
 
@@ -53,5 +58,18 @@ public class GenericAgentGizmos : MonoBehaviour
 
         Gizmos.DrawRay(position, leftRayDirection * radius);
         Gizmos.DrawRay(position, rightRayDirection * radius);
+    }
+
+    private void DrawPathGizmos(List<Vector3> points, Color color)
+    {
+        if (points == null || points.Count < 2) return;
+
+        Gizmos.color = color;
+        for (int i = 0; i < points.Count - 1; i++)
+        {
+            Gizmos.DrawLine(points[i] + Vector3.up * 0.2f, points[i + 1] + Vector3.up * 0.2f);
+            Gizmos.DrawSphere(points[i] + Vector3.up * 0.2f, 0.2f);
+        }
+        Gizmos.DrawSphere(points[points.Count - 1] + Vector3.up * 0.2f, 0.2f);
     }
 }

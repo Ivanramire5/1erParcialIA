@@ -220,7 +220,7 @@ GameObject:
   - component: {fileID: 1391549671756037991}
   - component: {fileID: -327628846047230875}
   m_Layer: 6
-  m_Name: AgentPrefab
+  m_Name: Boid
   m_TagString: Boid
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

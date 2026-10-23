@@ -4,30 +4,39 @@ using UnityEngine;
 public class WolfAgent : MonoBehaviour, IGizmoProvider
 {
     [Header("Stats")]
-    [SerializeField] private float _speed = 3.5f; // Velocidad de movimiento del lobo
+    [SerializeField] private float _speed = 4f;
     public float Speed => _speed;
 
     [Header("Percepcion y referencias")]
     public Transform HunterTarget;
-    public float viewRadius = 10f;
-    public float viewAngle = 90f;
     [SerializeField] public LayerMask WallMask;
+
+    private VisionSensor _visionSensor;
 
     [Header("Patrulla")]
     public List<Transform> waypoints;
     public float WaypointCheckDistance = 2f;
 
-    //Estado compartido para alertar a la manada
     public static Vector3? LastKnownHunterPosition { get; private set; }
     public static bool IsAlerted { get; private set; }
+
+    public List<Node> CurrentActivePath { get; set; } = new();
 
     private readonly FiniteStateMachine _fsm = new();
     public FiniteStateMachine FSM => _fsm;
 
-    //Estados de los lobos
     public WolfPatrolState PatrolState { get; private set; }
     public WolfChaseState ChaseState { get; private set; }
     public WolfInvestigateState InvestigateState { get; private set; }
+
+    private void Awake()
+    {
+        _visionSensor = GetComponentInChildren<VisionSensor>();
+        if (_visionSensor == null)
+        {
+            Debug.LogWarning("WolfAgent no encontró un componente VisionSensor en sus hijos.", gameObject);
+        }
+    }
 
     private void Start()
     {
@@ -35,12 +44,10 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         ChaseState = new WolfChaseState(this);
         InvestigateState = new WolfInvestigateState(this);
 
-        // Agregamos a la FSM
         _fsm.AddState(PatrolState);
         _fsm.AddState(ChaseState);
         _fsm.AddState(InvestigateState);
 
-        // Arrancamos patrullando
         _fsm.ChangeState(PatrolState);
     }
 
@@ -49,7 +56,6 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         _fsm.Update();
     }
 
-    // Alertar a la manada mediante un aullido
     public void Howl(Vector3 hunterPos)
     {
         LastKnownHunterPosition = hunterPos;
@@ -57,32 +63,66 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         Debug.Log("¡AULLIDO DE LOBO! ¡Cazador detectado en " + hunterPos + "!");
     }
 
-    //Sensor basico de linea de vista para detectar al cazador|FOV del lobo
+    public static void ResetAlert()
+    {
+        IsAlerted = false;
+        LastKnownHunterPosition = null;
+    }
+
     public bool DetectHunter(out Vector3 hunterPos)
     {
         hunterPos = default;
-        if (HunterTarget == null) return false;
+        if (_visionSensor == null) return false;
 
-        Vector3 dirToHunter = HunterTarget.position - transform.position;
-        float dist = dirToHunter.magnitude;
+        Transform closestHunter = _visionSensor.GetClosestVisibleHunter(transform.position);
 
-        if (dist <= viewRadius)
+        if (closestHunter != null)
         {
-            if (Vector3.Angle(transform.forward, dirToHunter.normalized) <= viewAngle / 2f)
-            {
-                // Chequear obstáculos con Linecast
-                if (!Physics.Linecast(transform.position, HunterTarget.position, WallMask))
-                {
-                    hunterPos = HunterTarget.position;
-                    return true;
-                }
-            }
+            hunterPos = closestHunter.position;
+            HunterTarget = closestHunter;
+            return true;
+        }
+
+        return false;
+    }
+
+    // Comprueba si el cazador se encuentra actualmente en un nodo de Zona Segura
+    public bool IsHunterInSafeZone()
+    {
+        if (HunterTarget == null)
+        {
+            GameObject hunterObj = GameObject.FindWithTag("Hunter");
+            if (hunterObj != null) HunterTarget = hunterObj.transform;
+        }
+
+        if (HunterTarget != null && Graph.Current != null)
+        {
+            Node node = Graph.Current.GetClosestNode(HunterTarget.position);
+            if (node != null && node.IsSafeZone) return true;
         }
         return false;
     }
 
     public IEnumerable<GizmoData> GetGizmosToDraw()
     {
-        yield return new GizmoData(viewRadius, Color.cyan);
+        if (_visionSensor == null)
+        {
+            _visionSensor = GetComponentInChildren<VisionSensor>();
+        }
+
+        if (_visionSensor != null)
+        {
+            yield return new GizmoData(_visionSensor.ViewRadius, _visionSensor.ViewAngle, Color.cyan);
+        }
+
+        if (CurrentActivePath != null && CurrentActivePath.Count > 0)
+        {
+            List<Vector3> pathPositions = new List<Vector3>();
+            foreach (var node in CurrentActivePath)
+            {
+                if (node != null) pathPositions.Add(node.transform.position);
+            }
+            yield return new GizmoData(pathPositions, Color.yellow);
+        }
     }
 }

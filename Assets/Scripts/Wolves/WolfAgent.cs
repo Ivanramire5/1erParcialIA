@@ -13,6 +13,9 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
 
     private VisionSensor _visionSensor;
 
+    [Header("Feedback Visual")]
+    [SerializeField] public Renderer _renderer;
+
     [Header("Patrulla")]
     public List<Transform> waypoints;
     public float WaypointCheckDistance = 2f;
@@ -60,6 +63,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     {
         LastKnownHunterPosition = hunterPos;
         IsAlerted = true;
+        CambiarColorSemaforo(Color.yellow);
         Debug.Log("¡AULLIDO DE LOBO! ¡Cazador detectado en " + hunterPos + "!");
     }
 
@@ -123,6 +127,13 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
                 if (node != null) pathPositions.Add(node.transform.position);
             }
             yield return new GizmoData(pathPositions, Color.yellow);
+        }
+    }
+    public void CambiarColorSemaforo(Color nuevoColor)
+    {
+        if (_renderer != null)
+        {
+            _renderer.material.color = nuevoColor;
         }
     }
 }

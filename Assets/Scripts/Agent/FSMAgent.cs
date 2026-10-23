@@ -5,9 +5,15 @@ public class FSMAgent : MonoBehaviour
 {
     [Header("Stats del Cazador")]
     public float Speed = 5f;
-    [SerializeField] public float _viewRadius;
+    [SerializeField] public float _viewRadius = 15f;
 
-    [Header("Obstacle Avoidance")]
+    [Header("Parcial 2: Variables Obligatorias")]
+    public int RequiredGathers = 3;
+    public float RespawnTime = 5f;
+    public float SafeZoneWaitTime = 4f;
+    public int boidsCollected = 0; // Contador de recolecciones
+
+    [Header("Obstacle Avoidance (Corto Alcance)")]
     public float obstacleViewDistance = 3f;
     public float obstacleWeight = 5f;
     public LayerMask obstacleLayer;
@@ -23,65 +29,55 @@ public class FSMAgent : MonoBehaviour
     public float RangeTBA = 5f;
     public float currentRangeTBATimer;
     public float RangeAttackRadius = 7f;
+    public GameObject bulletPrefab;
+    public Transform spawnBulletPoint;
 
     [Header("Visual Settings")]
     [SerializeField] private Renderer childRenderer;
-
-private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
+    private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
     private MaterialPropertyBlock _propBlock;
-
-    [Header("Disparo Settings")]
-    public GameObject bulletPrefab;
-    public Transform spawnBulletPoint;
 
     [Header("Steering Settings")]
     public float maxClamp = 10f;
     private Vector3 _velocity;
 
-    [Header("Interest Objects / Traps Settings")]
+    [Header("Trampas Settings")]
     public GameObject interestObjectPrefab;
-    [SerializeField, Tooltip("Tiempo en segundos entre cada aparición de un objeto de interés")]
-    private float timeToSpawnObject = 5f;
-    private float _objectSpawnTimer = 0f;
-    private List<GameObject> _activeInterestObjects = new List<GameObject>();
+    public float timeToSpawnObject = 5f;
+    [HideInInspector] public float objectSpawnTimer = 0f;
+    [HideInInspector] public List<GameObject> activeInterestObjects = new List<GameObject>();
 
-    [Header("Patrol Data")]
-    public PatrolData patrolData;
-
-    // Máquina de Estados y Estados
+    // Máquina de Estados 
     public FiniteStateMachine FSM { get; private set; }
-    public PatrolState Patrol { get; private set; }
+    
+    // NUEVOS ESTADOS (Parcial 2)
+    public HunterSearchState Search { get; private set; }
+    public HunterFleeState Flee { get; private set; }
+    public HunterExitState Exit { get; private set; }
+    public HunterDeadState Dead { get; private set; }
+    
+    // Estados Clásicos adaptados
     public AttackState Attack { get; private set; }
     public GatherState Gather { get; private set; }
-    public IdleState Idle { get; private set; }
 
-    // Objetivos
-    public Transform CurrentTarget;
-    public Transform DeadTarget;
+    [Header("Objetivos Actuales")]
+    public Transform CurrentTarget; // Presa viva
+    public Transform DeadTarget;    // Presa muerta
+    public Transform ThreatTarget;  // Lobo detectado
 
     private void Awake()
     {
         _propBlock = new MaterialPropertyBlock();
-
-        // Si no se asignó en el Inspector, busca la ruta exacta desde la raíz
         if (childRenderer == null)
         {
             Transform targetChild = transform.Find("Hunter/MTRL_Hunter");
-            if (targetChild != null)
-            {
-                childRenderer = targetChild.GetComponent<Renderer>();
-            }
-            else
-            {
-                Debug.LogError("No se encontró el objeto hijo en la ruta Hunter/MTRL_Hunter");
-            }
+            if (targetChild != null) childRenderer = targetChild.GetComponent<Renderer>();
         }
     }
 
     public void SetChildColor(Color newColor)
     {
         if (childRenderer == null) return;
-
         childRenderer.GetPropertyBlock(_propBlock);
         _propBlock.SetColor(ColorPropID, newColor);
         childRenderer.SetPropertyBlock(_propBlock);
@@ -91,20 +87,26 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
     {
         FSM = new FiniteStateMachine();
 
-        Patrol = new PatrolState(patrolData, this);
+        // Inicializamos los estados (los crearemos en el próximo paso)
+        Search = new HunterSearchState(this);
+        Flee = new HunterFleeState(this);
+        Exit = new HunterExitState(this);
+        Dead = new HunterDeadState(this);
         Attack = new AttackState(this);
         Gather = new GatherState(this);
-        Idle = new IdleState(this);
 
-        FSM.AddState(Patrol);
+        FSM.AddState(Search);
+        FSM.AddState(Flee);
+        FSM.AddState(Exit);
+        FSM.AddState(Dead);
         FSM.AddState(Attack);
         FSM.AddState(Gather);
-        FSM.AddState(Idle);
 
         currentMeleeTBATimer = MeleeTBA;
         currentRangeTBATimer = RangeTBA;
 
-        FSM.ChangeState(Idle);
+        // El estado inicial obligatorio ahora es Search
+        FSM.ChangeState(Search);
     }
 
     private void Update()
@@ -114,45 +116,82 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
 
         FSM.Update();
 
-     
         if (HitSignal != null)
         {
             HitSignal.gameObject.SetActive(currentMeleeTBATimer < 1.8f);
         }
     }
 
-    #region Disparo (Ranged Attack)
-    public void FireBullet(Transform target)
+    #region Sensores (Actualizado Parcial 2)
+    // Ahora devuelve la presa viva, la muerta y al Lobo más cercano
+    public void SenseEnvironment(float viewRadius, ref Transform aliveBoid, ref Transform deadBoid, ref Transform wolf)
     {
-        if (bulletPrefab != null && spawnBulletPoint != null)
+        Collider[] hits = Physics.OverlapSphere(transform.position, viewRadius);
+        float closestAliveDist = Mathf.Infinity;
+        float closestDeadDist = Mathf.Infinity;
+        float closestWolfDist = Mathf.Infinity;
+
+        foreach (Collider hit in hits)
         {
-            Vector3 direction = (target.position - spawnBulletPoint.position).normalized;
-            GameObject bulletObj = Instantiate(bulletPrefab, spawnBulletPoint.position, Quaternion.identity);
-            bulletObj.transform.forward = direction;
-        }
-        else
-        {
-            Debug.LogWarning("Falta asignar el prefab de la bala o el spawn point en el FSMAgent.");
+            // 1. Detectar Lobos (La máxima prioridad)
+            if (hit.CompareTag("Wolf"))
+            {
+                float dist = Vector3.Distance(transform.position, hit.transform.position);
+                if (dist < closestWolfDist)
+                {
+                    // Comprobamos si hay pared en medio usando tu obstacleLayer
+                    if (!Physics.Linecast(transform.position + Vector3.up, hit.transform.position + Vector3.up, obstacleLayer))
+                    {
+                        closestWolfDist = dist;
+                        wolf = hit.transform;
+                    }
+                }
+            }
+
+            // 2. Detectar Boids
+            Boid boid = hit.GetComponent<Boid>();
+            if (boid != null)
+            {
+                float dist = Vector3.Distance(transform.position, boid.transform.position);
+                
+                // Comprobamos línea de visión
+                if (!Physics.Linecast(transform.position + Vector3.up, boid.transform.position + Vector3.up, obstacleLayer))
+                {
+                    if (boid.IsDead)
+                    {
+                        if (dist < closestDeadDist)
+                        {
+                            closestDeadDist = dist;
+                            deadBoid = boid.transform;
+                        }
+                    }
+                    else
+                    {
+                        if (dist < closestAliveDist)
+                        {
+                            closestAliveDist = dist;
+                            aliveBoid = boid.transform;
+                        }
+                    }
+                }
+            }
         }
     }
     #endregion
 
-    #region Movimiento (Steering)
+    #region Movimiento Corto Alcance (Steering)
     public void SeekTo(Vector3 targetPosition)
     {
         Vector3 direction = targetPosition - transform.position;
         direction.y = 0f;
 
-        // Fuerza de búsqueda (Seek)
         Vector3 desired = direction.normalized * Speed;
         Vector3 seekSteering = desired - _velocity;
         seekSteering.y = 0f;
         seekSteering = Vector3.ClampMagnitude(seekSteering, maxClamp);
 
-        // Fuerza de evasión de obstáculos
         Vector3 obstacleSteering = CalculateObstacleAvoidance() * obstacleWeight;
 
-        // Combinar ambas fuerzas y aplicar Time.deltaTime de forma global y consistente
         Vector3 totalSteering = seekSteering + obstacleSteering;
         totalSteering = Vector3.ClampMagnitude(totalSteering, maxClamp) * Time.deltaTime;
 
@@ -171,35 +210,24 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
     private Vector3 CalculateObstacleAvoidance()
     {
         Vector3 rayDir = _velocity.sqrMagnitude > 0.001f ? _velocity.normalized : transform.forward;
-
-        Vector3[] directions = new Vector3[]
-        {
-            rayDir,
-            Quaternion.Euler(0, 35, 0) * rayDir,
-            Quaternion.Euler(0, -35, 0) * rayDir
-        };
-
-        // Usar la misma altura que en los Gizmos para asegurar consistencia
+        Vector3[] directions = { rayDir, Quaternion.Euler(0, 35, 0) * rayDir, Quaternion.Euler(0, -35, 0) * rayDir };
         Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
 
         foreach (Vector3 dir in directions)
         {
             if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
             {
-                // Desenderezar la normal para evitar desvíos en el eje Y
                 Vector3 avoidanceDir = hit.normal;
                 avoidanceDir.y = 0f;
-
                 Vector3 desired = avoidanceDir.normalized * Speed;
                 Vector3 steering = desired - _velocity;
                 steering.y = 0f;
                 return Vector3.ClampMagnitude(steering, maxClamp);
             }
         }
-
         return Vector3.zero;
     }
-    
+
     public void StopVelocity()
     {
         _velocity = Vector3.zero;
@@ -209,95 +237,35 @@ private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
     #region Objetos de Interés (Trampas)
     public void TrySpawnInterestObject()
     {
-        _objectSpawnTimer += Time.deltaTime;
+        objectSpawnTimer += Time.deltaTime;
 
-        if (_objectSpawnTimer >= timeToSpawnObject)
+        if (objectSpawnTimer >= timeToSpawnObject)
         {
-            _objectSpawnTimer = 0f;
-            _activeInterestObjects.RemoveAll(obj => obj == null || !obj.activeInHierarchy);
+            objectSpawnTimer = 0f;
+            activeInterestObjects.RemoveAll(obj => obj == null || !obj.activeInHierarchy);
 
-            if (_activeInterestObjects.Count < 5)
+            if (activeInterestObjects.Count < 5)
             {
                 Vector3 spawnPosition = new Vector3(transform.position.x, 0.4f, transform.position.z);
                 GameObject newInterestObject = Instantiate(interestObjectPrefab, spawnPosition, Quaternion.identity);
-                _activeInterestObjects.Add(newInterestObject);
+                activeInterestObjects.Add(newInterestObject);
             }
         }
     }
     #endregion
-
-    #region Sensores
-    public void SenseEnvironment(float viewRadius, ref Transform aliveBoid, ref Transform deadBoid)
+    #region Disparo (Ranged Attack)
+    public void FireBullet(Transform target)
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, viewRadius);
-        float closestAliveDist = Mathf.Infinity;
-        float closestDeadDist = Mathf.Infinity;
-
-        foreach (Collider hit in hits)
+        if (bulletPrefab != null && spawnBulletPoint != null)
         {
-            Boid boid = hit.GetComponent<Boid>();
-            if (boid != null)
-            {
-                float dist = Vector3.Distance(transform.position, boid.transform.position);
-
-                if (boid.IsDead)
-                {
-                    if (dist < closestDeadDist)
-                    {
-                        closestDeadDist = dist;
-                        deadBoid = boid.transform;
-                    }
-                }
-                else
-                {
-                    if (dist < closestAliveDist)
-                    {
-                        closestAliveDist = dist;
-                        aliveBoid = boid.transform;
-                    }
-                }
-            }
+            Vector3 direction = (target.position - spawnBulletPoint.position).normalized;
+            GameObject bulletObj = Instantiate(bulletPrefab, spawnBulletPoint.position, Quaternion.identity);
+            bulletObj.transform.forward = direction;
+        }
+        else
+        {
+            Debug.LogWarning("Falta asignar el prefab de la bala o el spawn point en el FSMAgent.");
         }
     }
     #endregion
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, _viewRadius);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, MeleeAttackRadius);
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, RangeAttackRadius);
-
-        Vector3 rayDir = _velocity.sqrMagnitude > 0.001f ? _velocity.normalized : transform.forward;
-        Vector3[] directions = new Vector3[]
-        {
-            rayDir,
-            Quaternion.Euler(0, 35, 0) * rayDir,
-            Quaternion.Euler(0, -35, 0) * rayDir
-        };
-
-        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
-
-        foreach (Vector3 dir in directions)
-        {
-            if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(rayOrigin, hit.point);
-                Gizmos.DrawWireSphere(hit.point, 0.15f);
-
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawRay(hit.point, hit.normal * 1.5f);
-            }
-            else
-            {
-                Gizmos.color = Color.green;
-                Gizmos.DrawRay(rayOrigin, dir * obstacleViewDistance);
-            }
-        }
-    }
 }

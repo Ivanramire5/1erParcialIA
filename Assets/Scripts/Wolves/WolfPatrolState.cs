@@ -18,6 +18,7 @@ public class WolfPatrolState : State
     {
         Debug.Log("Lobo: Entrando a estado PATROL");
         _currentPath.Clear();
+        _wolf.CambiarColorSemaforo(Color.green);
     }
 
     public override void Update()

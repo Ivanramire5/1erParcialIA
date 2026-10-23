@@ -26,7 +26,7 @@ public class GatherState : State
     {
         if (_deadBoid == null || !_deadBoid.gameObject.activeInHierarchy)
         {
-            _agent.FSM.ChangeState(_agent.Patrol);
+            _agent.FSM.ChangeState(_agent.Search);
             return;
         }
 
@@ -54,8 +54,22 @@ public class GatherState : State
                 {
                     _deadBoid.gameObject.SetActive(false);
                 }
+                
+                _agent.boidsCollected++;
+                Debug.Log($"Boids recolectados: {_agent.boidsCollected}/{_agent.RequiredGathers}");
 
-                _agent.FSM.ChangeState(_agent.Patrol);
+                // 2. Evaluamos a qué estado ir[cite: 7]
+                if (_agent.boidsCollected >= _agent.RequiredGathers)
+                {
+                    
+                    _agent.FSM.ChangeState(_agent.Exit);
+                }
+                else
+                {
+                    
+                    _agent.FSM.ChangeState(_agent.Search);
+                }
+                
             }
         }
     }

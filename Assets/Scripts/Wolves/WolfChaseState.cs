@@ -17,6 +17,7 @@ public class WolfChaseState : State
     {
         Debug.Log("Lobo: Entrando a CHASE. ¡Persiguiendo al cazador!");
         _howlTimer = _howlInterval;
+        _wolf.CambiarColorSemaforo(Color.red);
     }
 
     public override void Update()

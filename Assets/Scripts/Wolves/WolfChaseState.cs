@@ -36,7 +36,7 @@ public class WolfChaseState : State
         }
         else
         {
-            // REGLA: Si el cazador entró a una Zona Segura, descartamos la última posición y volvemos a patrullar[cite: 8]
+           
             if (_wolf.IsHunterInSafeZone())
             {
                 Debug.Log("Lobo: El cazador ingresó a una Zona Segura. Perdiendo objetivo y retornando a patrullar.");

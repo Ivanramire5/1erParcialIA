@@ -17,7 +17,7 @@ public static class Pathfinding
         };     
     }
 
-    // ESTA ES LA FUNCIÓN QUE UNITY NO ENCUENTRA (CS0117)
+   
     public static List<Node> AStar(Node startingNode, Node endNode, HeuristicMethod method = HeuristicMethod.Distance, System.Func<Node, bool> nodeFilter = null)
     {
         if (startingNode == null || endNode == null)
@@ -57,7 +57,7 @@ public static class Pathfinding
             {
                 if (neighbor.Blocked) continue;
 
-                // Filtro opcional (ej: para que los lobos ignoren nodos de Zonas Seguras)
+             
                 if (nodeFilter != null && !nodeFilter(neighbor)) continue;
 
                 int newCost = costSoFar[current] + neighbor.Cost;

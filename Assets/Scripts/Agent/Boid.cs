@@ -90,7 +90,14 @@ public class Boid : MonoBehaviour, IGizmoProvider
         _velocity.y = 0f;
         _velocity = Vector3.ClampMagnitude(_velocity, _maxSpeed);
 
+   
         transform.position += _velocity * Time.deltaTime;
+
+      
+        if (Bounds.Instance != null)
+        {
+            transform.position = Bounds.Instance.CalculateBoundPosition(transform.position);
+        }
 
         if (_velocity.sqrMagnitude > 0.001f)
         {

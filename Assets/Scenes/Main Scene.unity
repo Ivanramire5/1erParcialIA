@@ -2017,6 +2017,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1663593650}
     m_Modifications:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: _speed
+      value: 4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
       value: 
       objectReference: {fileID: 277567823}
@@ -2083,6 +2087,10 @@ PrefabInstance:
     - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_Name
       value: Wolf3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: _viewAngle
+      value: 100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4183,6 +4191,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1663593650}
     m_Modifications:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: _speed
+      value: 4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
       value: 
       objectReference: {fileID: 277567823}
@@ -4249,6 +4261,10 @@ PrefabInstance:
     - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_Name
       value: Wolf4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: _viewAngle
+      value: 100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10378,7 +10394,7 @@ GameObject:
   - component: {fileID: 2050571697}
   - component: {fileID: 2050571696}
   m_Layer: 0
-  m_Name: Zona Start
+  m_Name: PuntoRespawnCazador
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10487,7 +10503,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _speed
-      value: 2.5
+      value: 4.5
       objectReference: {fileID: 0}
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
@@ -10557,6 +10573,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wolf2
       objectReference: {fileID: 0}
+    - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: _viewAngle
+      value: 100
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10624,8 +10644,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: Speed
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: respawnPoint
+      value: 
+      objectReference: {fileID: 2050571695}
+    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: currentHealth
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: obstacleWeight
@@ -10670,6 +10702,10 @@ PrefabInstance:
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: 'patrolData.waypoints.Array.data[7]'
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3071417496196776102, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 3214856073927569471, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: m_Layer
@@ -10911,6 +10947,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1663593650}
     m_Modifications:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: _speed
+      value: 4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
       value: 
       objectReference: {fileID: 277567823}
@@ -10977,6 +11017,10 @@ PrefabInstance:
     - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_Name
       value: Wolf1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: _viewAngle
+      value: 100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

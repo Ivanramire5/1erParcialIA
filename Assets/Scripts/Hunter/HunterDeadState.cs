@@ -9,31 +9,42 @@ public class HunterDeadState : State
 
     public override void Enter()
     {
-        Debug.Log("Cazador: MUERTO. Esperando respawn...");
+        Debug.Log("Cazador: MUERTO. Desapareciendo...");
         _timer = 0f;
         _agent.StopVelocity();
         
-        // Lo volvemos "fantasma" para que los lobos no se traben
         _agent.GetComponent<Collider>().enabled = false;
-        _agent.SetChildColor(Color.clear);
+        _agent.SetVisible(false);
     }
 
     public override void Update()
     {
         _timer += Time.deltaTime;
+        
+        // Pasado RespawnTime, reaparece en la Zona inicial
         if (_timer >= _agent.RespawnTime)
         {
             _agent.boidsCollected = 0;
-            _agent.transform.position = Vector3.zero; // Cambiar por tu posición de Start
+            _agent.currentHealth = _agent.maxHealth;
+            
+            // Lo teletransportamos al punto de spawn antes de hacerlo visible
+            if (_agent.respawnPoint != null)
+            {
+                _agent.transform.position = _agent.respawnPoint.position;
+            }
+            else
+            {
+                _agent.transform.position = _agent.initialPosition; 
+            }
+
             _agent.FSM.ChangeState(_agent.Search);
         }
     }
 
     public override void Exit()
     {
-        // Vuelve a ser sólido y visible
         _agent.GetComponent<Collider>().enabled = true;
-        _agent.SetChildColor(Color.white); 
+        _agent.SetVisible(true); 
         Debug.Log("Cazador: RESPAWN COMPLETADO.");
     }
 }

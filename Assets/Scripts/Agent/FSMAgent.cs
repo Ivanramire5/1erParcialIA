@@ -7,11 +7,21 @@ public class FSMAgent : MonoBehaviour
     public float Speed = 5f;
     [SerializeField] public float _viewRadius = 15f;
 
-    [Header("Parcial 2: Variables Obligatorias")]
+    [Header("Health System")]
+    public float maxHealth = 100f;
+    public float currentHealth;
+    public bool IsDead => currentHealth <= 0;
+
+    [Header("Variables de Juego")]
     public int RequiredGathers = 3;
     public float RespawnTime = 5f;
     public float SafeZoneWaitTime = 4f;
     public int boidsCollected = 0; // Contador de recolecciones
+
+    [Header("Zonas del Mapa")]
+    [Tooltip("Arrastrá acá el Transform del punto de Respawn (Zona Inicial)")]
+    public Transform respawnPoint;
+    [HideInInspector] public Vector3 initialPosition;
 
     [Header("Obstacle Avoidance (Corto Alcance)")]
     public float obstacleViewDistance = 3f;
@@ -50,7 +60,6 @@ public class FSMAgent : MonoBehaviour
     // Máquina de Estados 
     public FiniteStateMachine FSM { get; private set; }
     
-    // NUEVOS ESTADOS (Parcial 2)
     public HunterSearchState Search { get; private set; }
     public HunterFleeState Flee { get; private set; }
     public HunterExitState Exit { get; private set; }
@@ -64,6 +73,13 @@ public class FSMAgent : MonoBehaviour
     public Transform CurrentTarget; // Presa viva
     public Transform DeadTarget;    // Presa muerta
     public Transform ThreatTarget;  // Lobo detectado
+
+    // --- VARIABLES DE OPTIMIZACIÓN DE RENDIMIENTO ---
+    private float _senseTimer = 0f;
+    private readonly float _senseInterval = 0.2f;
+    private Transform _lastSeenAlive = null;
+    private Transform _lastSeenDead = null;
+    private Transform _lastSeenWolf = null;
 
     private void Awake()
     {
@@ -82,12 +98,24 @@ public class FSMAgent : MonoBehaviour
         _propBlock.SetColor(ColorPropID, newColor);
         childRenderer.SetPropertyBlock(_propBlock);
     }
+    
+    #region Apaga o enciende al cazador
+    public void SetVisible(bool isVisible)
+    {
+        if (childRenderer != null)
+        {
+            childRenderer.enabled = isVisible;
+        }
+    }
+    #endregion
 
     private void Start()
     {
+        initialPosition = transform.position;
+        currentHealth = maxHealth;
         FSM = new FiniteStateMachine();
 
-        // Inicializamos los estados (los crearemos en el próximo paso)
+        // Inicializamos los estados
         Search = new HunterSearchState(this);
         Flee = new HunterFleeState(this);
         Exit = new HunterExitState(this);
@@ -122,14 +150,32 @@ public class FSMAgent : MonoBehaviour
         }
     }
 
-    #region Sensores (Actualizado Parcial 2)
-    // Ahora devuelve la presa viva, la muerta y al Lobo más cercano
+    #region Sensores (OPTIMIZADO)
+    // Ahora devuelve la presa viva, la muerta y al Lobo más cercano con escaneo optimizado
     public void SenseEnvironment(float viewRadius, ref Transform aliveBoid, ref Transform deadBoid, ref Transform wolf)
     {
+        _senseTimer += Time.deltaTime;
+        
+        // Si no pasó el tiempo de escaneo, devolvemos lo que guardamos en la caché
+        if (_senseTimer < _senseInterval)
+        {
+            aliveBoid = _lastSeenAlive;
+            deadBoid = _lastSeenDead;
+            wolf = _lastSeenWolf;
+            return;
+        }
+
+        _senseTimer = 0f;
+
         Collider[] hits = Physics.OverlapSphere(transform.position, viewRadius);
         float closestAliveDist = Mathf.Infinity;
         float closestDeadDist = Mathf.Infinity;
         float closestWolfDist = Mathf.Infinity;
+
+        // Limpiamos las referencias actuales para actualizarlas
+        aliveBoid = null;
+        deadBoid = null;
+        wolf = null;
 
         foreach (Collider hit in hits)
         {
@@ -176,6 +222,20 @@ public class FSMAgent : MonoBehaviour
                 }
             }
         }
+
+        // Guardamos los resultados para el próximo ciclo
+        _lastSeenAlive = aliveBoid;
+        _lastSeenDead = deadBoid;
+        _lastSeenWolf = wolf;
+    }
+    #endregion
+
+    #region El damage que recibe el cazador 
+    public void TakeDamage(float amount)
+    {
+        if (IsDead) return;
+        currentHealth -= amount;
+        Debug.Log($"Cazador recibió {amount} de daño. Vida restante: {currentHealth}");
     }
     #endregion
 
@@ -253,6 +313,7 @@ public class FSMAgent : MonoBehaviour
         }
     }
     #endregion
+    
     #region Disparo (Ranged Attack)
     public void FireBullet(Transform target)
     {

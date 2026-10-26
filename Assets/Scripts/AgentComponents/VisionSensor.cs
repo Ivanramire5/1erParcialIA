@@ -24,20 +24,42 @@ public class VisionSensor : MonoBehaviour
     private readonly List<Transform> _detectedObjects = new();
     private readonly List<Transform> _detectedWolves = new();
 
-    public bool HasVisibleHunters => GetClosestVisibleHunter(transform.position) != null;
-    public bool HasVisibleObjects => GetClosestVisibleObject(transform.position) != null;
-    public bool HasVisibleWolves => GetClosestVisibleWolf(transform.position) != null;
+    // --- VARIABLES DE OPTIMIZACIÓN ---
+    private float _senseTimer = 0.2f; // Arranca en 0.2f para que escanee en el frame 1
+    private readonly float _senseInterval = 0.2f;
+    private Transform _cachedHunter;
+    private Transform _cachedObject;
+    private Transform _cachedWolf;
+
+    public bool HasVisibleHunters => _cachedHunter != null;
+    public bool HasVisibleObjects => _cachedObject != null;
+    public bool HasVisibleWolves => _cachedWolf != null;
 
     private void Awake()
     {
         _sensorCollider = GetComponent<SphereCollider>();
         _sensorCollider.isTrigger = true;
 
-        // Si pertenece a un Boid, sincronizamos opcionalmente el radio si lo requiere
         Boid parentBoid = GetComponentInParent<Boid>();
         if (parentBoid != null)
         {
             _sensorCollider.radius = parentBoid.ViewRadius;
+        }
+    }
+
+    // --- NUEVO: LOOP DE OPTIMIZACIÓN ---
+    private void Update()
+    {
+        _senseTimer += Time.deltaTime;
+        
+        // Ejecutamos los Raycasts y cálculos pesados solo 5 veces por segundo
+        if (_senseTimer >= _senseInterval)
+        {
+            _cachedHunter = GetClosestVisibleFromList(_detectedHunters, transform.position);
+            _cachedObject = GetClosestVisibleFromList(_detectedObjects, transform.position);
+            _cachedWolf = GetClosestVisibleFromList(_detectedWolves, transform.position);
+            
+            _senseTimer = 0f;
         }
     }
 
@@ -73,20 +95,10 @@ public class VisionSensor : MonoBehaviour
         }
     }
 
-    public Transform GetClosestVisibleHunter(Vector3 currentPosition)
-    {
-        return GetClosestVisibleFromList(_detectedHunters, currentPosition);
-    }
-
-    public Transform GetClosestVisibleWolf(Vector3 currentPosition)
-    {
-        return GetClosestVisibleFromList(_detectedWolves, currentPosition);
-    }
-
-    public Transform GetClosestVisibleObject(Vector3 currentPosition)
-    {
-        return GetClosestVisibleFromList(_detectedObjects, currentPosition);
-    }
+    // Ahora simplemente devolvemos la variable guardada para no gastar procesador
+    public Transform GetClosestVisibleHunter(Vector3 currentPosition) => _cachedHunter;
+    public Transform GetClosestVisibleWolf(Vector3 currentPosition) => _cachedWolf;
+    public Transform GetClosestVisibleObject(Vector3 currentPosition) => _cachedObject;
 
     private Transform GetClosestVisibleFromList(List<Transform> list, Vector3 currentPosition)
     {
@@ -120,12 +132,12 @@ public class VisionSensor : MonoBehaviour
 
     private bool CanSeeTarget(Transform target)
     {
-        // REGLA DEL PARCIAL: Si el objetivo es el cazador y est� dentro de una Zona Segura, es invisible para todos[cite: 8]
         if (IsAValidTarget(target.gameObject.layer, _hunterMask))
         {
             if (Graph.Current != null)
             {
                 Node closestNode = Graph.Current.GetClosestNode(target.position);
+                // Los lobos no pueden ver al cazador si está en Zona Segura[cite: 5, 8]
                 if (closestNode != null && closestNode.IsSafeZone)
                 {
                     return false;

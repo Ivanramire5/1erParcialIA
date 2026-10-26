@@ -4,8 +4,9 @@ using UnityEngine;
 public class WolfChaseState : State
 {
     private readonly WolfAgent _wolf;
-
-    private float _howlInterval = 5f;
+    
+    
+    private float _howlInterval = 1.5f; 
     private float _howlTimer = 0f;
 
     public WolfChaseState(WolfAgent wolf)
@@ -17,7 +18,9 @@ public class WolfChaseState : State
     {
         Debug.Log("Lobo: Entrando a CHASE. ¡Persiguiendo al cazador!");
         _howlTimer = _howlInterval;
-        _wolf.CambiarColorSemaforo(Color.red);
+        
+        // Feedback Visual: Color rojo de persecución/ataque
+        _wolf.CambiarColorSemaforo(Color.red); 
     }
 
     public override void Update()
@@ -33,10 +36,43 @@ public class WolfChaseState : State
             }
 
             PursueHunter(hunterPos);
+
+            Vector3 wolfFlat = new Vector3(_wolf.transform.position.x, 0f, _wolf.transform.position.z);
+            Vector3 hunterFlat = new Vector3(hunterPos.x, 0f, hunterPos.z);
+            
+            float distancia = Vector3.Distance(wolfFlat, hunterFlat);
+            
+            if (distancia <= 2.5f) 
+            {
+                if (_wolf.HunterTarget != null)
+                {
+                
+                    FSMAgent hunter = _wolf.HunterTarget.GetComponentInParent<FSMAgent>();
+                    
+                    if (hunter != null)
+                    {
+                        // Le quitamos toda la vida de un solo golpe
+                        hunter.TakeDamage(hunter.maxHealth); 
+
+                        if (hunter.IsDead)
+                        {
+                            Debug.Log("¡EL LOBO ATRAPÓ AL CAZADOR!");
+                            hunter.FSM.ChangeState(hunter.Dead); 
+                            
+                            WolfAgent.ResetAlert(); 
+                            _wolf.FSM.ChangeState(_wolf.PatrolState); 
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("El lobo tocó al objetivo, pero no encontró el script FSMAgent.");
+                    }
+                }
+            }
         }
         else
         {
-           
             if (_wolf.IsHunterInSafeZone())
             {
                 Debug.Log("Lobo: El cazador ingresó a una Zona Segura. Perdiendo objetivo y retornando a patrullar.");

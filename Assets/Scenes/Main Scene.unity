@@ -474,7 +474,7 @@ Camera:
   m_GameObject: {fileID: 79429615}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -1228,7 +1228,6 @@ GameObject:
   m_Component:
   - component: {fileID: 330585546}
   - component: {fileID: 330585545}
-  - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   m_Layer: 0
   m_Name: Main Camera
@@ -1237,14 +1236,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &330585544
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330585543}
-  m_Enabled: 1
 --- !u!20 &330585545
 Camera:
   m_ObjectHideFlags: 0
@@ -2088,9 +2079,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wolf3
       objectReference: {fileID: 0}
+    - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Wolf
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4262,9 +4261,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wolf4
       objectReference: {fileID: 0}
+    - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Wolf
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10573,9 +10580,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wolf2
       objectReference: {fileID: 0}
+    - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
+    - target: {fileID: 8079841659381645732, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Wolf
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10651,6 +10670,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: ThreatTarget
+      value: 
+      objectReference: {fileID: 2306507209072166781, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: respawnPoint
       value: 
@@ -11014,13 +11037,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6214427327753368346, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_Name
       value: Wolf1
       objectReference: {fileID: 0}
+    - target: {fileID: 7714036154216274816, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
+      propertyPath: m_TagString
+      value: Wolf
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

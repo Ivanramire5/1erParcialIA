@@ -5,7 +5,7 @@ public enum GizmoType
 {
     WireSphere,
     VisionCone,
-    PathLines // NUEVO: Para dibujar la ruta de A*
+    PathLines // Para dibujar la ruta de A*
 }
 
 public struct GizmoData
@@ -15,7 +15,7 @@ public struct GizmoData
     public float Angle;
     public Color Color;
     public Vector3 Offset;
-    public List<Vector3> PathPoints; // NUEVO: Puntos del camino de A*
+    public List<Vector3> PathPoints; //  Puntos del camino de A*
 
     // Constructor para Esferas
     public GizmoData(float radius, Color color, Vector3 offset = default)
@@ -39,7 +39,7 @@ public struct GizmoData
         PathPoints = null;
     }
 
-    // Constructor para Caminos de Pathfinding (NUEVO)
+    // Constructor para Caminos de Pathfinding
     public GizmoData(List<Vector3> pathPoints, Color color)
     {
         Type = GizmoType.PathLines;

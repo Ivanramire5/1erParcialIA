@@ -21,7 +21,7 @@ public class WolfInvestigateState : State
     public override void Enter()
     {
         Debug.Log("Lobo: Entrando a INVESTIGATE. Calculando ruta hacia la alerta.");
-        _wolf.CambiarColorSemaforo(Color.yellow);
+        _wolf.SetColor(Color.yellow);
         _path.Clear();
         _pathIndex = 0;
         _isSniffing = false;

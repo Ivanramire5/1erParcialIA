@@ -18,12 +18,12 @@ public class WolfPatrolState : State
     {
         Debug.Log("Lobo: Entrando a estado PATROL");
         _currentPath.Clear();
-        _wolf.CambiarColorSemaforo(Color.green);
+        _wolf.SetColor(Color.green);
     }
 
     public override void Update()
     {
-        // 1. SENSADO VISUAL DIRECTO[cite: 2, 13]
+        // 1. SENSADO VISUAL DIRECTO
         if (_wolf.DetectHunter(out Vector3 hunterPos))
         {
             _wolf.Howl(hunterPos);
@@ -31,21 +31,21 @@ public class WolfPatrolState : State
             return;
         }
 
-        // 2. SENSADO AUDITIVO (Alerta global de otro lobo)[cite: 2, 13]
+        // 2. SENSADO AUDITIVO (Alerta global de otro lobo)
         if (WolfAgent.IsAlerted)
         {
             _wolf.FSM.ChangeState(_wolf.InvestigateState);
             return;
         }
-
-        // 3. LÓGICA DE PATRULLAJE Y NAVEGACIÓN[cite: 13]
+        
+        // 3. LÓGICA DE PATRULLAJE Y NAVEGACIÓN
         PatrolBehavior();
     }
 
     private void PatrolBehavior()
     {
         if (_wolf.waypoints == null || _wolf.waypoints.Count == 0) return;
-
+      
         Transform targetWaypoint = _wolf.waypoints[_waypointIndex];
         float distanceToWaypoint = Vector3.Distance(_wolf.transform.position, targetWaypoint.position);
 
@@ -56,7 +56,7 @@ public class WolfPatrolState : State
             _currentPath.Clear();
         }
 
-        // 4. VERIFICAR LÍNEA DE VISIÓN AL WAYPOINT[cite: 2, 13]
+        // 4. VERIFICAR LÍNEA DE VISIÓN AL WAYPOINT
         bool hasLineOfSight = !Physics.Linecast(_wolf.transform.position, targetWaypoint.position, _wolf.WallMask);
 
         if (hasLineOfSight)

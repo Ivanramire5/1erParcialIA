@@ -8,7 +8,7 @@ public class ColorController : MonoBehaviour
 
     private MaterialPropertyBlock _propBlock;
 
-    // NOTA: "_BaseColor" es para URP/HDRP. Si usas el Standard Shader de Built-in, cambialo a "_Color"
+   
     private static readonly int ColorPropID = Shader.PropertyToID("_BaseColor");
 
     private void Awake()

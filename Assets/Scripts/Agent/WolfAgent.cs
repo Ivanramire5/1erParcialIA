@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class WolfAgent : MonoBehaviour, IGizmoProvider
 {
@@ -12,9 +13,9 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     [SerializeField] public LayerMask WallMask;
 
     private VisionSensor _visionSensor;
-
+    private ColorController _colorController;
     [Header("Feedback Visual")]
-    [SerializeField] public Renderer _renderer;
+    //[SerializeField] public Renderer _renderer;
 
     [Header("Patrulla")]
     public List<Transform> waypoints;
@@ -27,17 +28,19 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
 
     private readonly FiniteStateMachine _fsm = new();
     public FiniteStateMachine FSM => _fsm;
-
+    
     public WolfPatrolState PatrolState { get; private set; }
     public WolfChaseState ChaseState { get; private set; }
     public WolfInvestigateState InvestigateState { get; private set; }
 
     private void Awake()
     {
-        _visionSensor = GetComponentInChildren<VisionSensor>();
-        if (_visionSensor == null)
+       
+        _colorController = GetComponent<ColorController>();
+
+        if (_colorController == null)
         {
-            Debug.LogWarning("WolfAgent no encontró un componente VisionSensor en sus hijos.", gameObject);
+            Debug.LogError("Falta el componente ColorController en el WolfAgent.", gameObject);
         }
     }
 
@@ -46,7 +49,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         PatrolState = new WolfPatrolState(this);
         ChaseState = new WolfChaseState(this);
         InvestigateState = new WolfInvestigateState(this);
-
+     
         _fsm.AddState(PatrolState);
         _fsm.AddState(ChaseState);
         _fsm.AddState(InvestigateState);
@@ -63,8 +66,20 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     {
         LastKnownHunterPosition = hunterPos;
         IsAlerted = true;
-        CambiarColorSemaforo(Color.yellow);
+       
         Debug.Log("¡AULLIDO DE LOBO! ¡Cazador detectado en " + hunterPos + "!");
+    }
+
+    public void SetColor(Color newColor)
+    {
+        if (_colorController != null)
+        {
+            _colorController.SetColor(newColor);
+        }
+        else
+        {
+            Debug.LogWarning("Intentando cambiar color, pero _colorController es nulo en WolfAgent.");
+        }
     }
 
     public static void ResetAlert()
@@ -72,7 +87,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         IsAlerted = false;
         LastKnownHunterPosition = null;
     }
-
+  
     public bool DetectHunter(out Vector3 hunterPos)
     {
         hunterPos = default;
@@ -90,7 +105,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         return false;
     }
 
-    // Comprueba si el cazador se encuentra actualmente en un nodo de Zona Segura
+   
     public bool IsHunterInSafeZone()
     {
         if (HunterTarget == null)
@@ -129,11 +144,5 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
             yield return new GizmoData(pathPositions, Color.yellow);
         }
     }
-    public void CambiarColorSemaforo(Color nuevoColor)
-    {
-        if (_renderer != null)
-        {
-            _renderer.material.color = nuevoColor;
-        }
-    }
+
 }

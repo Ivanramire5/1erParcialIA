@@ -137,7 +137,7 @@ public class VisionSensor : MonoBehaviour
             if (Graph.Current != null)
             {
                 Node closestNode = Graph.Current.GetClosestNode(target.position);
-                // Los lobos no pueden ver al cazador si está en Zona Segura[cite: 5, 8]
+              
                 if (closestNode != null && closestNode.IsSafeZone)
                 {
                     return false;

@@ -10,12 +10,13 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
 
     [Header("Percepcion y referencias")]
     public Transform HunterTarget;
+    private FSMAgent _hunter;
     [SerializeField] public LayerMask WallMask;
 
     private VisionSensor _visionSensor;
     private ColorController _colorController;
     [Header("Feedback Visual")]
-    //[SerializeField] public Renderer _renderer;
+
 
     [Header("Patrulla")]
     public List<Transform> waypoints;
@@ -37,11 +38,9 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     {
        
         _colorController = GetComponent<ColorController>();
+        _visionSensor = GetComponentInChildren<VisionSensor>();
 
-        if (_colorController == null)
-        {
-            Debug.LogError("Falta el componente ColorController en el WolfAgent.", gameObject);
-        }
+        
     }
 
     private void Start()
@@ -90,6 +89,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
   
     public bool DetectHunter(out Vector3 hunterPos)
     {
+       
         hunterPos = default;
         if (_visionSensor == null) return false;
 
@@ -97,6 +97,15 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
 
         if (closestHunter != null)
         {
+           
+            FSMAgent hunterComponent = closestHunter.GetComponentInParent<FSMAgent>();
+
+      
+            if (hunterComponent != null && hunterComponent.IsDead)
+            {
+                return false;
+            }
+
             hunterPos = closestHunter.position;
             HunterTarget = closestHunter;
             return true;

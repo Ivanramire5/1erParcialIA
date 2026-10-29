@@ -16,7 +16,7 @@ public class Graph : MonoBehaviour
 
     [Header("Parámetros de Autogeneración")]
     [SerializeField] private float _maxConnectionDistance = 6f; // Distancia máxima para conectar
-    [SerializeField] private LayerMask _wallMask; // ¡ATENCIÓN: Solo la Layer de paredes, NO el piso ni Default!
+    [SerializeField] private LayerMask _wallMask; 
 
     private void Awake()
     {

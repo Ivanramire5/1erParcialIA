@@ -1458,6 +1458,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330708714}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &349534540 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3071417496196776102, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+  m_PrefabInstance: {fileID: 2069465841}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &354306073
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2014,7 +2019,7 @@ PrefabInstance:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
       value: 
-      objectReference: {fileID: 277567823}
+      objectReference: {fileID: 349534540}
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: waypoints.Array.size
       value: 2
@@ -4196,7 +4201,7 @@ PrefabInstance:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
       value: 
-      objectReference: {fileID: 277567823}
+      objectReference: {fileID: 349534540}
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: waypoints.Array.size
       value: 4
@@ -10515,7 +10520,7 @@ PrefabInstance:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
       value: 
-      objectReference: {fileID: 277567823}
+      objectReference: {fileID: 349534540}
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: waypoints.Array.size
       value: 4
@@ -10976,7 +10981,7 @@ PrefabInstance:
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: HunterTarget
       value: 
-      objectReference: {fileID: 277567823}
+      objectReference: {fileID: 349534540}
     - target: {fileID: 1229204795686224453, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: waypoints.Array.size
       value: 4

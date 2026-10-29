@@ -1,31 +1,34 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WolfPatrolState : State
 {
     private readonly WolfAgent _wolf;
     private int _waypointIndex = 0;
-
+  
     private List<Node> _currentPath = new List<Node>();
     private int _pathIndex = 0;
 
     public WolfPatrolState(WolfAgent wolf)
     {
         _wolf = wolf;
-    }
 
+    }
+    
     public override void Enter()
     {
         Debug.Log("Lobo: Entrando a estado PATROL");
         _currentPath.Clear();
         _wolf.SetColor(Color.green);
+        
     }
 
     public override void Update()
     {
         // 1. SENSADO VISUAL DIRECTO
         if (_wolf.DetectHunter(out Vector3 hunterPos))
-        {
+        {            
             _wolf.Howl(hunterPos);
             _wolf.FSM.ChangeState(_wolf.ChaseState);
             return;
@@ -37,8 +40,8 @@ public class WolfPatrolState : State
             _wolf.FSM.ChangeState(_wolf.InvestigateState);
             return;
         }
-        
-        // 3. LÓGICA DE PATRULLAJE Y NAVEGACIÓN
+         
+       
         PatrolBehavior();
     }
 

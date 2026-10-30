@@ -9,13 +9,17 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     public float Speed => _speed;
 
     [Header("Percepcion y referencias")]
-    public Transform HunterTarget;
-    [SerializeField] public LayerMask WallMask;
+    [SerializeField] private Transform _hunterTarget; 
+    public Transform HunterTarget => _hunterTarget;
+
+    private FSMAgent _hunter;
+    [SerializeField] private LayerMask _wallMask; 
+    public LayerMask WallMask => _wallMask;       
 
     private VisionSensor _visionSensor;
     private ColorController _colorController;
     [Header("Feedback Visual")]
-    //[SerializeField] public Renderer _renderer;
+
 
     [Header("Patrulla")]
     public List<Transform> waypoints;
@@ -37,11 +41,9 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     {
        
         _colorController = GetComponent<ColorController>();
+        _visionSensor = GetComponentInChildren<VisionSensor>();
 
-        if (_colorController == null)
-        {
-            Debug.LogError("Falta el componente ColorController en el WolfAgent.", gameObject);
-        }
+        
     }
 
     private void Start()
@@ -76,10 +78,11 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         {
             _colorController.SetColor(newColor);
         }
-        else
-        {
-            Debug.LogWarning("Intentando cambiar color, pero _colorController es nulo en WolfAgent.");
-        }
+      
+    }
+    public void SetHunterTarget(Transform newTarget)
+    {
+        _hunterTarget = newTarget;
     }
 
     public static void ResetAlert()
@@ -90,6 +93,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
   
     public bool DetectHunter(out Vector3 hunterPos)
     {
+       
         hunterPos = default;
         if (_visionSensor == null) return false;
 
@@ -97,8 +101,17 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
 
         if (closestHunter != null)
         {
+           
+            FSMAgent hunterComponent = closestHunter.GetComponentInParent<FSMAgent>();
+
+      
+            if (hunterComponent != null && hunterComponent.IsDead)
+            {
+                return false;
+            }
+
             hunterPos = closestHunter.position;
-            HunterTarget = closestHunter;
+            SetHunterTarget(closestHunter);
             return true;
         }
 
@@ -111,7 +124,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         if (HunterTarget == null)
         {
             GameObject hunterObj = GameObject.FindWithTag("Hunter");
-            if (hunterObj != null) HunterTarget = hunterObj.transform;
+            if (hunterObj != null) SetHunterTarget(hunterObj.transform) ;
         }
 
         if (HunterTarget != null && Graph.Current != null)

@@ -24,8 +24,8 @@ public class VisionSensor : MonoBehaviour
     private readonly List<Transform> _detectedObjects = new();
     private readonly List<Transform> _detectedWolves = new();
 
-    // --- VARIABLES DE OPTIMIZACIÓN ---
-    private float _senseTimer = 0.2f; // Arranca en 0.2f para que escanee en el frame 1
+   
+    private float _senseTimer = 0.2f; 
     private readonly float _senseInterval = 0.2f;
     private Transform _cachedHunter;
     private Transform _cachedObject;
@@ -47,12 +47,11 @@ public class VisionSensor : MonoBehaviour
         }
     }
 
-    // --- NUEVO: LOOP DE OPTIMIZACIÓN ---
     private void Update()
     {
         _senseTimer += Time.deltaTime;
         
-        // Ejecutamos los Raycasts y cálculos pesados solo 5 veces por segundo
+        
         if (_senseTimer >= _senseInterval)
         {
             _cachedHunter = GetClosestVisibleFromList(_detectedHunters, transform.position);
@@ -95,7 +94,7 @@ public class VisionSensor : MonoBehaviour
         }
     }
 
-    // Ahora simplemente devolvemos la variable guardada para no gastar procesador
+    
     public Transform GetClosestVisibleHunter(Vector3 currentPosition) => _cachedHunter;
     public Transform GetClosestVisibleWolf(Vector3 currentPosition) => _cachedWolf;
     public Transform GetClosestVisibleObject(Vector3 currentPosition) => _cachedObject;
@@ -137,7 +136,7 @@ public class VisionSensor : MonoBehaviour
             if (Graph.Current != null)
             {
                 Node closestNode = Graph.Current.GetClosestNode(target.position);
-                // Los lobos no pueden ver al cazador si está en Zona Segura[cite: 5, 8]
+              
                 if (closestNode != null && closestNode.IsSafeZone)
                 {
                     return false;
@@ -146,7 +145,7 @@ public class VisionSensor : MonoBehaviour
         }
 
         Vector3 dirToTarget = (target.position - transform.position).normalized;
-        if (Vector3.Angle(transform.forward, dirToTarget) > _viewAngle * 0.5f)
+        if (Vector3.Angle(transform.forward, dirToTarget) > _viewAngle /2f)
         {
             return false;
         }

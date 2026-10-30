@@ -106,6 +106,7 @@ public class WolfChaseState : State
     }  
     public override void Exit()
     {
+
         Debug.Log("Lobo: Saliendo de CHASE.");
     } 
 }

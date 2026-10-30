@@ -1,44 +1,46 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WolfPatrolState : State
 {
     private readonly WolfAgent _wolf;
     private int _waypointIndex = 0;
-
+  
     private List<Node> _currentPath = new List<Node>();
     private int _pathIndex = 0;
 
     public WolfPatrolState(WolfAgent wolf)
     {
         _wolf = wolf;
-    }
 
+    }
+    
     public override void Enter()
     {
         Debug.Log("Lobo: Entrando a estado PATROL");
         _currentPath.Clear();
         _wolf.SetColor(Color.green);
+        
     }
 
     public override void Update()
     {
-        // 1. SENSADO VISUAL DIRECTO
+      
         if (_wolf.DetectHunter(out Vector3 hunterPos))
-        {
+        {            
             _wolf.Howl(hunterPos);
             _wolf.FSM.ChangeState(_wolf.ChaseState);
             return;
         }
 
-        // 2. SENSADO AUDITIVO (Alerta global de otro lobo)
         if (WolfAgent.IsAlerted)
         {
             _wolf.FSM.ChangeState(_wolf.InvestigateState);
             return;
         }
-        
-        // 3. LÓGICA DE PATRULLAJE Y NAVEGACIÓN
+         
+       
         PatrolBehavior();
     }
 
@@ -56,7 +58,7 @@ public class WolfPatrolState : State
             _currentPath.Clear();
         }
 
-        // 4. VERIFICAR LÍNEA DE VISIÓN AL WAYPOINT
+    
         bool hasLineOfSight = !Physics.Linecast(_wolf.transform.position, targetWaypoint.position, _wolf.WallMask);
 
         if (hasLineOfSight)
@@ -80,7 +82,7 @@ public class WolfPatrolState : State
             {
                 Node targetNode = _currentPath[_pathIndex];
 
-                // Distancia plana (ignorando Y)
+               
                 Vector3 wolfPosFlat = new Vector3(_wolf.transform.position.x, 0f, _wolf.transform.position.z);
                 Vector3 targetPosFlat = new Vector3(targetNode.transform.position.x, 0f, targetNode.transform.position.z);
                 float distToNode = Vector3.Distance(wolfPosFlat, targetPosFlat);

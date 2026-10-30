@@ -8,10 +8,10 @@ public class WolfInvestigateState : State
     private int _pathIndex = 0;
     private Vector3 _targetPosition;
 
-    // Variables para el delay de olfateo
+  
     private bool _isSniffing = false;
     private float _sniffTimer = 0f;
-    private readonly float _sniffDuration = 2.5f; // Tiempo que se queda oliendo en el lugar
+    private readonly float _sniffDuration = 2.5f; 
 
     public WolfInvestigateState(WolfAgent wolf)
     {
@@ -36,7 +36,7 @@ public class WolfInvestigateState : State
 
     public override void Update()
     {
-        // 1. SENSADO: Si durante la investigación u olfateo ve al cazador, vuelve a CHASE
+      
         if (_wolf.DetectHunter(out Vector3 hunterPos))
         {
             _wolf.Howl(hunterPos);
@@ -44,7 +44,7 @@ public class WolfInvestigateState : State
             return;
         }
 
-        // 2. NAVEGACIÓN A* HACIA LA ALERTA
+      
         if (_path != null && _pathIndex < _path.Count)
         {
             Node targetNode = _path[_pathIndex];
@@ -64,7 +64,7 @@ public class WolfInvestigateState : State
         }
         else
         {
-            // 3. LLEGÓ A LA ZONA: Comienza la fase de olfateo
+           
             if (!_isSniffing)
             {
                 _isSniffing = true;
@@ -75,7 +75,7 @@ public class WolfInvestigateState : State
 
             _sniffTimer += Time.deltaTime;
 
-            // Se queda oliendo durante el tiempo configurado
+            
             if (_sniffTimer >= _sniffDuration)
             {
                 Debug.Log("Lobo: Fin del olfateo sin éxito. Retomando patrullaje.");
@@ -87,7 +87,7 @@ public class WolfInvestigateState : State
 
     private void CalculateAStarPath(Vector3 targetPos)
     {
-        // Los lobos excluyen nodos de zonas seguras al calcular A*[cite: 5, 8]
+        
         Node startNode = Graph.Current.GetClosestNode(_wolf.transform.position, excludeSafeZones: true);
         Node endNode = Graph.Current.GetClosestNode(targetPos, excludeSafeZones: true);
 

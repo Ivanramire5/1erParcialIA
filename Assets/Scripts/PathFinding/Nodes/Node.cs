@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    public bool IsExitNode = false;
+    [SerializeField] private bool _isExitNode = false;
+    public bool IsExitNode => _isExitNode;
     [Header("Configuración del Nodo")]
     [SerializeField] private int _cost = 1;
     public int Cost => _cost;
@@ -38,11 +39,11 @@ public class Node : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        // Color según estado (Magenta = Zona Segura, Rojo = Bloqueado, Amarillo = Normal)
+        
         Gizmos.color = _isSafeZone ? Color.magenta : (_blocked ? Color.red : Color.yellow);
         Gizmos.DrawSphere(transform.position, 0.3f);
 
-        // Dibujar líneas hacia los vecinos
+        
         Gizmos.color = Color.green;
         foreach (var neighbor in _neighbors)
         {

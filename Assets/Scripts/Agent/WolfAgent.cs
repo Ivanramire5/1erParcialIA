@@ -9,9 +9,12 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     public float Speed => _speed;
 
     [Header("Percepcion y referencias")]
-    public Transform HunterTarget;
+    [SerializeField] private Transform _hunterTarget; 
+    public Transform HunterTarget => _hunterTarget;
+
     private FSMAgent _hunter;
-    [SerializeField] public LayerMask WallMask;
+    [SerializeField] private LayerMask _wallMask; 
+    public LayerMask WallMask => _wallMask;       
 
     private VisionSensor _visionSensor;
     private ColorController _colorController;
@@ -75,10 +78,11 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         {
             _colorController.SetColor(newColor);
         }
-        else
-        {
-            Debug.LogWarning("Intentando cambiar color, pero _colorController es nulo en WolfAgent.");
-        }
+      
+    }
+    public void SetHunterTarget(Transform newTarget)
+    {
+        _hunterTarget = newTarget;
     }
 
     public static void ResetAlert()
@@ -107,7 +111,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
             }
 
             hunterPos = closestHunter.position;
-            HunterTarget = closestHunter;
+            SetHunterTarget(closestHunter);
             return true;
         }
 
@@ -120,7 +124,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         if (HunterTarget == null)
         {
             GameObject hunterObj = GameObject.FindWithTag("Hunter");
-            if (hunterObj != null) HunterTarget = hunterObj.transform;
+            if (hunterObj != null) SetHunterTarget(hunterObj.transform) ;
         }
 
         if (HunterTarget != null && Graph.Current != null)

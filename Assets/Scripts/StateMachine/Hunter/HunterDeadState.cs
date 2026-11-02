@@ -21,13 +21,13 @@ public class HunterDeadState : State
     {
         _timer += Time.deltaTime;
         
-        // Pasado RespawnTime, reaparece en la Zona inicial
+        
         if (_timer >= _agent.RespawnTime)
         {
             _agent.boidsCollected = 0;
             _agent.currentHealth = _agent.maxHealth;
             
-            // Lo teletransportamos al punto de spawn antes de hacerlo visible
+            
             if (_agent.respawnPoint != null)
             {
                 _agent.transform.position = _agent.respawnPoint.position;

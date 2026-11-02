@@ -1953,7 +1953,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
-      value: 100
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_TagString
@@ -4135,7 +4135,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
-      value: 100
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_TagString
@@ -10287,7 +10287,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
-      value: 100
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_TagString
@@ -10361,11 +10361,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: Speed
-      value: 6
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: _viewRadius
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: ThreatTarget
@@ -10748,7 +10752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8283508407006940339, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: _viewAngle
-      value: 100
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 9207989062931036089, guid: 5e6c77b7a6fb2db45a6d1befdde9813d, type: 3}
       propertyPath: m_TagString

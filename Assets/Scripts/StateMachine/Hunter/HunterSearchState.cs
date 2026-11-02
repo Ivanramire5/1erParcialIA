@@ -19,7 +19,7 @@ public class HunterSearchState : State
     {
         Transform aliveBoid = null, deadBoid = null, wolf = null;
         
-        //Escaneamos el entorno usando la función actualizada
+
         _agent.SenseEnvironment(_agent._viewRadius, ref aliveBoid, ref deadBoid, ref wolf);
 
         

@@ -16,7 +16,7 @@ public class FSMAgent : MonoBehaviour
     public int RequiredGathers = 3;
     public float RespawnTime = 5f;
     public float SafeZoneWaitTime = 4f;
-    public int boidsCollected = 0; // Contador de recolecciones
+    public int boidsCollected = 0; 
 
     [Header("Zonas del Mapa")]
     [Tooltip("Arrastrá acá el Transform del punto de Respawn (Zona Inicial)")]
@@ -70,11 +70,10 @@ public class FSMAgent : MonoBehaviour
     public GatherState Gather { get; private set; }
 
     [Header("Objetivos Actuales")]
-    public Transform CurrentTarget; // Presa viva
-    public Transform DeadTarget;    // Presa muerta
-    public Transform ThreatTarget;  // Lobo detectado
+    public Transform CurrentTarget; 
+    public Transform DeadTarget;    
+    public Transform ThreatTarget; 
 
-    // --- VARIABLES DE OPTIMIZACIÓN DE RENDIMIENTO ---
     private float _senseTimer = 0f;
     private readonly float _senseInterval = 0.2f;
     private Transform _lastSeenAlive = null;
@@ -115,7 +114,7 @@ public class FSMAgent : MonoBehaviour
         currentHealth = maxHealth;
         FSM = new FiniteStateMachine();
 
-        // Inicializamos los estados
+
         Search = new HunterSearchState(this);
         Flee = new HunterFleeState(this);
         Exit = new HunterExitState(this);
@@ -133,7 +132,6 @@ public class FSMAgent : MonoBehaviour
         currentMeleeTBATimer = MeleeTBA;
         currentRangeTBATimer = RangeTBA;
 
-        // El estado inicial obligatorio ahora es Search
         FSM.ChangeState(Search);
     }
 
@@ -141,6 +139,9 @@ public class FSMAgent : MonoBehaviour
     {
         currentMeleeTBATimer += Time.deltaTime;
         currentRangeTBATimer += Time.deltaTime;
+        
+        
+        _senseTimer += Time.deltaTime;
 
         FSM.Update();
 
@@ -150,13 +151,10 @@ public class FSMAgent : MonoBehaviour
         }
     }
 
-    #region Sensores (OPTIMIZADO)
-    // Ahora devuelve la presa viva, la muerta y al Lobo más cercano con escaneo optimizado
+    #region Sensores (OPTIMIZADO CON CACHÉ CORREGIDO)
     public void SenseEnvironment(float viewRadius, ref Transform aliveBoid, ref Transform deadBoid, ref Transform wolf)
     {
-        _senseTimer += Time.deltaTime;
-        
-        // Si no pasó el tiempo de escaneo, devolvemos lo que guardamos en la caché
+    
         if (_senseTimer < _senseInterval)
         {
             aliveBoid = _lastSeenAlive;
@@ -165,65 +163,68 @@ public class FSMAgent : MonoBehaviour
             return;
         }
 
+        
         _senseTimer = 0f;
 
-        Collider[] hits = Physics.OverlapSphere(transform.position, viewRadius);
+        
+        Collider[] hits = Physics.OverlapSphere(transform.position, viewRadius, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+        
         float closestAliveDist = Mathf.Infinity;
         float closestDeadDist = Mathf.Infinity;
         float closestWolfDist = Mathf.Infinity;
 
-        // Limpiamos las referencias actuales para actualizarlas
         aliveBoid = null;
         deadBoid = null;
         wolf = null;
 
+        Vector3 eyePos = transform.position + Vector3.up;
+
         foreach (Collider hit in hits)
         {
-            // 1. Detectar Lobos (La máxima prioridad)
+            if (hit.transform == transform) continue; 
+
+            Vector3 targetPos = hit.transform.position + Vector3.up;
+
+            
+            if (Physics.Linecast(eyePos, targetPos, obstacleLayer))
+            {
+                continue; 
+            }
+
             if (hit.CompareTag("Wolf"))
             {
                 float dist = Vector3.Distance(transform.position, hit.transform.position);
                 if (dist < closestWolfDist)
                 {
-                    // Comprobamos si hay pared en medio usando tu obstacleLayer
-                    if (!Physics.Linecast(transform.position + Vector3.up, hit.transform.position + Vector3.up, obstacleLayer))
-                    {
-                        closestWolfDist = dist;
-                        wolf = hit.transform;
-                    }
+                    closestWolfDist = dist;
+                    wolf = hit.transform;
                 }
             }
 
-            // 2. Detectar Boids
             Boid boid = hit.GetComponent<Boid>();
             if (boid != null)
             {
                 float dist = Vector3.Distance(transform.position, boid.transform.position);
                 
-                // Comprobamos línea de visión
-                if (!Physics.Linecast(transform.position + Vector3.up, boid.transform.position + Vector3.up, obstacleLayer))
+                if (boid.IsDead)
                 {
-                    if (boid.IsDead)
+                    if (dist < closestDeadDist)
                     {
-                        if (dist < closestDeadDist)
-                        {
-                            closestDeadDist = dist;
-                            deadBoid = boid.transform;
-                        }
+                        closestDeadDist = dist;
+                        deadBoid = boid.transform;
                     }
-                    else
+                }
+                else
+                {
+                    if (dist < closestAliveDist)
                     {
-                        if (dist < closestAliveDist)
-                        {
-                            closestAliveDist = dist;
-                            aliveBoid = boid.transform;
-                        }
+                        closestAliveDist = dist;
+                        aliveBoid = boid.transform;
                     }
                 }
             }
         }
 
-        // Guardamos los resultados para el próximo ciclo
         _lastSeenAlive = aliveBoid;
         _lastSeenDead = deadBoid;
         _lastSeenWolf = wolf;

@@ -11,7 +11,7 @@ public class FleeState : State
     {
         _boid.SetColor(Color.cyan);
 
-        // Al asustarnos, guardamos en la memoria quién es el cazador
+        // Al asustarnos, guardamos en la memoria quiï¿½n es el cazador
         _currentHunter = _boid.Sensor.GetClosestVisibleHunter(_boid.transform.position);
     }
 
@@ -19,8 +19,8 @@ public class FleeState : State
     {
         if (_boid.IsDead) return;
 
-        // Si por alguna razón el cazador es nulo (ej. fue destruido o desactivado)
-        // intentamos buscar uno nuevo en la visión.
+        // Si por alguna razï¿½n el cazador es nulo (ej. fue destruido o desactivado)
+        // intentamos buscar uno nuevo en la visiï¿½n.
         if (_currentHunter == null || !_currentHunter.gameObject.activeInHierarchy)
         {
             _currentHunter = _boid.Sensor.GetClosestVisibleHunter(_boid.transform.position);
@@ -36,15 +36,15 @@ public class FleeState : State
         // Calculamos la distancia lineal hacia el cazador recordado
         float distanceToHunter = Vector3.Distance(_boid.transform.position, _currentHunter.position);
 
-        // CONDICIÓN DE SALIDA: Si ya corrimos lo suficiente y estamos fuera de su radio
-        // de visión/peligro, dejamos de huir.
+        // CONDICIï¿½N DE SALIDA: Si ya corrimos lo suficiente y estamos fuera de su radio
+        // de visiï¿½n/peligro, dejamos de huir.
         if (distanceToHunter > _boid.ViewRadius)
         {
             _boid.FSM.ChangeState(_boid.StateFlock);
             return;
         }
 
-        // Mientras siga cerca, continuamos huyendo de su posición
+        // Mientras siga cerca, continuamos huyendo de su posiciï¿½n
         Vector3 steering = _boid.CalculateFlee(_currentHunter.position)
                          + _boid.CalculateSeparation(Boid.AllAgents, _boid.SeparationRadius) * 1.5f;
 

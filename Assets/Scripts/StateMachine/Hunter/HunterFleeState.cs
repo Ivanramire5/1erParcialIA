@@ -16,64 +16,92 @@ public class HunterFleeState : State
         Debug.Log("Cazador: ¡LOBO DETECTADO! Huyendo a la Zona Segura más cercana.");
         _isSafe = false;
         _timer = 0f;
+        _agent.SetChildColor(Color.magenta);
 
-        Node start = Graph.Current.GetClosestNode(_agent.transform.position, false);
-        Node safeNode = null;
-        float minDist = Mathf.Infinity;
+        Node start = Graph.Current.GetClosestNode(_agent.transform.position);
+        List<Node> bestPath = null;
+        float minPathCost = Mathf.Infinity;
 
-        // Buscar el refugio más cercano
         foreach (var node in Graph.Current.AllNodes)
         {
-            if (node.IsSafeZone) // Asegurate de tener public bool IsSafeZone; en Node.cs
+            if (node.IsSafeZone) 
             {
-                float dist = Vector3.Distance(_agent.transform.position, node.transform.position);
-                if (dist < minDist)
+                List<Node> currentPath = Pathfinding.AStar(start, node, Pathfinding.HeuristicMethod.Distance);
+                
+                if (currentPath != null && currentPath.Count > 0)
                 {
-                    minDist = dist;
-                    safeNode = node;
+                    if (currentPath.Count < minPathCost)
+                    {
+                        minPathCost = currentPath.Count;
+                        bestPath = currentPath;
+                    }
                 }
             }
         }
 
-        if (safeNode != null)
+        if (bestPath != null)
         {
-            _path = Pathfinding.AStar(start, safeNode, Pathfinding.HeuristicMethod.Distance);
+            _path = bestPath;
             _pathIndex = 0;
+        }
+        else
+        {
+            Debug.LogWarning("Cazador: No se encontró ruta a ninguna Zona Segura.");
         }
     }
 
     public override void Update()
     {
+        
         if (_isSafe)
         {
             _agent.StopVelocity();
             _timer += Time.deltaTime;
+            
             if (_timer >= _agent.SafeZoneWaitTime)
             {
+                Debug.Log("Cazador: Tiempo de espera en Zona Segura terminado. Retomando actividad.");
+                
                 if (_agent.boidsCollected >= _agent.RequiredGathers)
+                {
                     _agent.FSM.ChangeState(_agent.Exit);
+                }
                 else
+                {
                     _agent.FSM.ChangeState(_agent.Search);
+                }
             }
             return;
         }
 
+        
         if (_path == null || _pathIndex >= _path.Count)
         {
-            _isSafe = true; // Llegó al refugio
+            
+            _isSafe = true; 
             return;
         }
 
+      
         Vector3 targetPos = _path[_pathIndex].transform.position;
-        
         Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
         Vector3 targetFlatPos = new Vector3(targetPos.x, 0f, targetPos.z);
 
-        if (Vector3.Distance(agentFlatPos, targetFlatPos) < 1f)
+        
+        float checkDistance = (_pathIndex == _path.Count - 1) ? 2.5f : 1f;
+
+        if (Vector3.Distance(agentFlatPos, targetFlatPos) < checkDistance)
+        {
             _pathIndex++;
+        }
         else
+        {
             _agent.SeekTo(targetPos);
+        }
     }
 
-    public override void Exit() { }
+    public override void Exit() 
+    {
+        Debug.Log("Cazador: Saliendo del estado FLEE.");
+    }
 }

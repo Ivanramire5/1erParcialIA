@@ -12,6 +12,7 @@ public class HunterSearchState : State
     public override void Enter()
     {
         Debug.Log("Cazador: Entrando a Search (Navegando con A*)");
+        _agent.SetChildColor(Color.blue);
         CalculateNewPath();
     }
 

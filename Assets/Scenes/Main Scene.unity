@@ -1356,7 +1356,7 @@ PrefabInstance:
       objectReference: {fileID: 1138499044}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -43.88
+      value: -43.61
       objectReference: {fileID: 0}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1364,7 +1364,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -11.28
+      value: -14.14
       objectReference: {fileID: 0}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -9561,7 +9561,7 @@ PrefabInstance:
       objectReference: {fileID: 1522298963}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -14.66
+      value: -14.41
       objectReference: {fileID: 0}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalPosition.y
@@ -9569,7 +9569,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -11.83
+      value: -14.09
       objectReference: {fileID: 0}
     - target: {fileID: 4112870757498558791, guid: a7d0c60542ff2c442a862d3d1eb5d9c4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -10364,6 +10364,10 @@ PrefabInstance:
       value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: maxClamp
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -10389,7 +10393,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: obstacleViewDistance
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2029925098748036046, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: patrolData.waypoints.Array.size
@@ -10458,6 +10462,10 @@ PrefabInstance:
     - target: {fileID: 4391673981238993108, guid: 91f7700308951b241a47df0b595a7820, type: 3}
       propertyPath: m_Layer
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7230700116101691720, guid: 91f7700308951b241a47df0b595a7820, type: 3}
+      propertyPath: m_UseGravity
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

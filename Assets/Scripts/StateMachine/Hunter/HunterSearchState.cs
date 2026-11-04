@@ -48,10 +48,10 @@ public class HunterSearchState : State
         }
 
 
-        //Movimiento usando el Grafo A*
+
         FollowPath();
         
-        // 4. Tirar trampas
+
         _agent.TrySpawnInterestObject();
     }
 

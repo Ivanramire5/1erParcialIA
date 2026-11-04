@@ -17,7 +17,7 @@ public class HunterExitState : State
         
         foreach (var node in Graph.Current.AllNodes)
         {
-            if (node.IsExitNode) // Asegurate de tener public bool IsExitNode; en Node.cs
+            if (node.IsExitNode) 
             {
                 exitNode = node;
                 break;
@@ -37,7 +37,7 @@ public class HunterExitState : State
         {
             Debug.Log("Cazador: ESCAPE EXITOSO. Reiniciando ciclo.");
             _agent.boidsCollected = 0;
-            _agent.transform.position = Vector3.zero; // Cambiar por la posición de tu Zona Inicial
+            _agent.transform.position = Vector3.zero; 
             _agent.FSM.ChangeState(_agent.Search);
             return;
         }

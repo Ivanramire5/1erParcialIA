@@ -110,7 +110,8 @@ public class FSMAgent : MonoBehaviour
 
     private void Start()
     {
-        initialPosition = transform.position;
+        initialPosition = new Vector3(transform.position.x, 0f, transform.position.z);
+        transform.position = initialPosition;
         currentHealth = maxHealth;
         FSM = new FiniteStateMachine();
 

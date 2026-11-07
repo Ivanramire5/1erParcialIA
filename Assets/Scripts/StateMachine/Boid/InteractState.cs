@@ -28,7 +28,7 @@ public class InteractState : State
         }
 
         Vector3 steering = _boid.CalculateArrive(_targetObject.position)
-                         + _boid.CalculateSeparation(Boid.AllAgents, _boid.SeparationRadius) * 1.5f;
+             + _boid.CalculateSeparation(Boid.AllAgents, _boid.SeparationRadius) * 1.5f;
         _boid.ApplyMovement(steering);
         _boid.InteractWithObject(_targetObject);
     }

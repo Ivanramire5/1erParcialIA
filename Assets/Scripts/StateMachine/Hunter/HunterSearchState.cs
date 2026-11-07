@@ -50,7 +50,7 @@ public class HunterSearchState : State
 
         FollowPath();
         
-        // 4. Tirar trampas
+
         _agent.TrySpawnInterestObject();
     }
 

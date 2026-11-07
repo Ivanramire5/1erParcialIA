@@ -26,7 +26,8 @@ public class HunterFleeState : State
         {
             if (node.IsSafeZone) 
             {
-                List<Node> currentPath = Pathfinding.AStar(start, node, Pathfinding.HeuristicMethod.Distance);
+                // Llamada limpia solo con start y node
+                List<Node> currentPath = Pathfinding.AStar(start, node);
                 
                 if (currentPath != null && currentPath.Count > 0)
                 {
@@ -96,7 +97,13 @@ public class HunterFleeState : State
         }
         else
         {
-            _agent.SeekTo(targetPos);
+            Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
+            }
+            _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
         }
     }
 

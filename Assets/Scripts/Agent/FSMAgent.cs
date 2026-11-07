@@ -110,11 +110,21 @@ public class FSMAgent : MonoBehaviour
 
     private void Start()
     {
+        // El Start queda super limpio, delegando la creación de la FSM a su propia función
         initialPosition = new Vector3(transform.position.x, 0f, transform.position.z);
         transform.position = initialPosition;
         currentHealth = maxHealth;
-        FSM = new FiniteStateMachine();
 
+        currentMeleeTBATimer = MeleeTBA;
+        currentRangeTBATimer = RangeTBA;
+
+        InicializarFSM();
+    }
+
+    // --- NUEVA FUNCIÓN PARA LIMPIAR EL START ---
+    private void InicializarFSM()
+    {
+        FSM = new FiniteStateMachine();
 
         Search = new HunterSearchState(this);
         Flee = new HunterFleeState(this);
@@ -130,9 +140,6 @@ public class FSMAgent : MonoBehaviour
         FSM.AddState(Attack);
         FSM.AddState(Gather);
 
-        currentMeleeTBATimer = MeleeTBA;
-        currentRangeTBATimer = RangeTBA;
-
         FSM.ChangeState(Search);
     }
 
@@ -140,7 +147,6 @@ public class FSMAgent : MonoBehaviour
     {
         currentMeleeTBATimer += Time.deltaTime;
         currentRangeTBATimer += Time.deltaTime;
-        
         
         _senseTimer += Time.deltaTime;
 
@@ -155,7 +161,6 @@ public class FSMAgent : MonoBehaviour
     #region Sensores (OPTIMIZADO CON CACHÉ CORREGIDO)
     public void SenseEnvironment(float viewRadius, ref Transform aliveBoid, ref Transform deadBoid, ref Transform wolf)
     {
-    
         if (_senseTimer < _senseInterval)
         {
             aliveBoid = _lastSeenAlive;
@@ -163,10 +168,8 @@ public class FSMAgent : MonoBehaviour
             wolf = _lastSeenWolf;
             return;
         }
-
         
         _senseTimer = 0f;
-
         
         Collider[] hits = Physics.OverlapSphere(transform.position, viewRadius, Physics.AllLayers, QueryTriggerInteraction.Ignore);
         
@@ -185,7 +188,6 @@ public class FSMAgent : MonoBehaviour
             if (hit.transform == transform) continue; 
 
             Vector3 targetPos = hit.transform.position + Vector3.up;
-
             
             if (Physics.Linecast(eyePos, targetPos, obstacleLayer))
             {

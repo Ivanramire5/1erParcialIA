@@ -26,7 +26,8 @@ public class HunterExitState : State
 
         if (exitNode != null)
         {
-            _path = Pathfinding.AStar(start, exitNode, Pathfinding.HeuristicMethod.Distance);
+            
+            _path = Pathfinding.AStar(start, exitNode);
             _pathIndex = 0;
         }
     }
@@ -48,9 +49,21 @@ public class HunterExitState : State
         Vector3 targetFlatPos = new Vector3(targetPos.x, 0f, targetPos.z);
 
         if (Vector3.Distance(agentFlatPos, targetFlatPos) < 1f)
+        {
             _pathIndex++;
+        }
         else
-            _agent.SeekTo(targetPos);
+        {
+            Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
+            
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
+            }
+            
+            _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
+        }
     }
 
     public override void Exit() { }

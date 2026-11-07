@@ -48,7 +48,6 @@ public class HunterSearchState : State
         }
 
 
-
         FollowPath();
         
 
@@ -64,7 +63,6 @@ public class HunterSearchState : State
         }
 
         Vector3 targetPos = _path[_pathIndex].transform.position;
-        
         Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
         Vector3 targetFlatPos = new Vector3(targetPos.x, 0f, targetPos.z);
 
@@ -74,7 +72,17 @@ public class HunterSearchState : State
         }
         else
         {
-            _agent.SeekTo(targetPos); 
+            
+            Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
+            
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
+            }
+            
+            _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
         }
     }
 
@@ -84,7 +92,8 @@ public class HunterSearchState : State
         
         Node end = Graph.Current.AllNodes[Random.Range(0, Graph.Current.AllNodes.Count)];
         
-        _path = Pathfinding.AStar(start, end, Pathfinding.HeuristicMethod.Distance);
+        // Llamamos al AStar SOLO con el nodo de inicio y fin, sin el Enum
+        _path = Pathfinding.AStar(start, end);
         _pathIndex = 0;
     }
 

@@ -87,13 +87,13 @@ public class WolfInvestigateState : State
 
     private void CalculateAStarPath(Vector3 targetPos)
     {
-        
         Node startNode = Graph.Current.GetClosestNode(_wolf.transform.position, excludeSafeZones: true);
         Node endNode = Graph.Current.GetClosestNode(targetPos, excludeSafeZones: true);
 
         if (startNode != null && endNode != null)
         {
-            _path = Pathfinding.AStar(startNode, endNode, Pathfinding.HeuristicMethod.Distance, node => !node.IsSafeZone);
+            // Llamada limpia sin el Enum, pasando directamente al filtro de nodos seguros
+            _path = Pathfinding.AStar(startNode, endNode, node => !node.IsSafeZone);
             _wolf.CurrentActivePath = _path;
         }
     }

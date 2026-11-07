@@ -58,7 +58,6 @@ public class AttackState : State
     {
         Debug.Log("Ataque Cuerpo a Cuerpo ejecutado!");
 
-       
         _agent.currentMeleeTBATimer = 0f;
 
         if (boid != null)
@@ -101,7 +100,7 @@ public class AttackState : State
         {
             
             Quaternion targetRot = Quaternion.LookRotation(dir);
-            _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 10f);
+            _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
         }
 
         _agent.transform.position += dir * _agent.Speed * Time.deltaTime;

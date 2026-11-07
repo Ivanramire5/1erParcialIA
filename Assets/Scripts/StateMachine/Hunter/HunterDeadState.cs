@@ -21,16 +21,16 @@ public class HunterDeadState : State
     {
         _timer += Time.deltaTime;
         
-        
         if (_timer >= _agent.RespawnTime)
         {
             _agent.boidsCollected = 0;
             _agent.currentHealth = _agent.maxHealth;
             
-            
             if (_agent.respawnPoint != null)
             {
-                _agent.transform.position = _agent.respawnPoint.position;
+                Vector3 spawnPos = _agent.respawnPoint.position;
+                spawnPos.y = 0f; 
+                _agent.transform.position = spawnPos;
             }
             else
             {

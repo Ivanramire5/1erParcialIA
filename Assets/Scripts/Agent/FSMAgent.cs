@@ -65,7 +65,6 @@ public class FSMAgent : MonoBehaviour
     public HunterExitState Exit { get; private set; }
     public HunterDeadState Dead { get; private set; }
     
-    // Estados Clásicos adaptados
     public AttackState Attack { get; private set; }
     public GatherState Gather { get; private set; }
 
@@ -110,7 +109,6 @@ public class FSMAgent : MonoBehaviour
 
     private void Start()
     {
-        // El Start queda super limpio, delegando la creación de la FSM a su propia función
         initialPosition = new Vector3(transform.position.x, 0f, transform.position.z);
         transform.position = initialPosition;
         currentHealth = maxHealth;
@@ -121,7 +119,6 @@ public class FSMAgent : MonoBehaviour
         InicializarFSM();
     }
 
-    // --- NUEVA FUNCIÓN PARA LIMPIAR EL START ---
     private void InicializarFSM()
     {
         FSM = new FiniteStateMachine();
@@ -158,7 +155,7 @@ public class FSMAgent : MonoBehaviour
         }
     }
 
-    #region Sensores (OPTIMIZADO CON CACHÉ CORREGIDO)
+    #region Sensores (OPTIMIZADO Y BLINDADO)
     public void SenseEnvironment(float viewRadius, ref Transform aliveBoid, ref Transform deadBoid, ref Transform wolf)
     {
         if (_senseTimer < _senseInterval)
@@ -244,54 +241,6 @@ public class FSMAgent : MonoBehaviour
     #endregion
 
     #region Movimiento Corto Alcance (Steering)
-    public void SeekTo(Vector3 targetPosition)
-    {
-        Vector3 direction = targetPosition - transform.position;
-        direction.y = 0f;
-
-        Vector3 desired = direction.normalized * Speed;
-        Vector3 seekSteering = desired - _velocity;
-        seekSteering.y = 0f;
-        seekSteering = Vector3.ClampMagnitude(seekSteering, maxClamp);
-
-        Vector3 obstacleSteering = CalculateObstacleAvoidance() * obstacleWeight;
-
-        Vector3 totalSteering = seekSteering + obstacleSteering;
-        totalSteering = Vector3.ClampMagnitude(totalSteering, maxClamp) * Time.deltaTime;
-
-        _velocity += totalSteering;
-        _velocity.y = 0f;
-        _velocity = Vector3.ClampMagnitude(_velocity, Speed);
-
-        transform.position += _velocity * Time.deltaTime;
-
-        if (_velocity.sqrMagnitude > 0.001f)
-        {
-            transform.forward = _velocity.normalized;
-        }
-    }
-
-    private Vector3 CalculateObstacleAvoidance()
-    {
-        Vector3 rayDir = _velocity.sqrMagnitude > 0.001f ? _velocity.normalized : transform.forward;
-        Vector3[] directions = { rayDir, Quaternion.Euler(0, 35, 0) * rayDir, Quaternion.Euler(0, -35, 0) * rayDir };
-        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
-
-        foreach (Vector3 dir in directions)
-        {
-            if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, obstacleViewDistance, obstacleLayer))
-            {
-                Vector3 avoidanceDir = hit.normal;
-                avoidanceDir.y = 0f;
-                Vector3 desired = avoidanceDir.normalized * Speed;
-                Vector3 steering = desired - _velocity;
-                steering.y = 0f;
-                return Vector3.ClampMagnitude(steering, maxClamp);
-            }
-        }
-        return Vector3.zero;
-    }
-
     public void StopVelocity()
     {
         _velocity = Vector3.zero;
@@ -331,6 +280,17 @@ public class FSMAgent : MonoBehaviour
         {
             Debug.LogWarning("Falta asignar el prefab de la bala o el spawn point en el FSMAgent.");
         }
+    }
+    #endregion
+    #region Reseteo de Cooldowns de Ataque
+    public void ResetMeleeTimer()
+    {
+        currentMeleeTBATimer = 0f;
+    }
+
+    public void ResetRangeTimer()
+    {
+        currentRangeTBATimer = 0f;
     }
     #endregion
 }

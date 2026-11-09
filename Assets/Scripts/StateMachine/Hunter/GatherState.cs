@@ -30,11 +30,22 @@ public class GatherState : State
             return;
         }
 
-        float distance = Vector3.Distance(_agent.transform.position, _deadBoid.position);
+        Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
+        Vector3 targetFlatPos = new Vector3(_deadBoid.position.x, 0f, _deadBoid.position.z);
+        float distance = Vector3.Distance(agentFlatPos, targetFlatPos);
 
         if (distance > _reachDistance)
         {
-            _agent.SeekTo(_deadBoid.position);
+
+            Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
+
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
+            }
+
+            _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
         }
         else
         {
@@ -58,18 +69,14 @@ public class GatherState : State
                 _agent.boidsCollected++;
                 Debug.Log($"Boids recolectados: {_agent.boidsCollected}/{_agent.RequiredGathers}");
 
-                // 2. Evaluamos a qué estado ir[cite: 7]
                 if (_agent.boidsCollected >= _agent.RequiredGathers)
                 {
-                    
                     _agent.FSM.ChangeState(_agent.Exit);
                 }
                 else
                 {
-                    
                     _agent.FSM.ChangeState(_agent.Search);
                 }
-                
             }
         }
     }

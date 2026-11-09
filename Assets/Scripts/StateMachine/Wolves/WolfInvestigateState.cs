@@ -8,7 +8,6 @@ public class WolfInvestigateState : State
     private int _pathIndex = 0;
     private Vector3 _targetPosition;
 
-  
     private bool _isSniffing = false;
     private float _sniffTimer = 0f;
     private readonly float _sniffDuration = 2.5f; 
@@ -22,6 +21,7 @@ public class WolfInvestigateState : State
     {
         Debug.Log("Lobo: Entrando a INVESTIGATE. Calculando ruta hacia la alerta.");
         _wolf.SetColor(Color.yellow);
+        
         _path.Clear();
         _pathIndex = 0;
         _isSniffing = false;
@@ -36,7 +36,6 @@ public class WolfInvestigateState : State
 
     public override void Update()
     {
-      
         if (_wolf.DetectHunter(out Vector3 hunterPos))
         {
             _wolf.Howl(hunterPos);
@@ -44,7 +43,6 @@ public class WolfInvestigateState : State
             return;
         }
 
-      
         if (_path != null && _pathIndex < _path.Count)
         {
             Node targetNode = _path[_pathIndex];
@@ -64,7 +62,6 @@ public class WolfInvestigateState : State
         }
         else
         {
-           
             if (!_isSniffing)
             {
                 _isSniffing = true;
@@ -75,7 +72,6 @@ public class WolfInvestigateState : State
 
             _sniffTimer += Time.deltaTime;
 
-            
             if (_sniffTimer >= _sniffDuration)
             {
                 Debug.Log("Lobo: Fin del olfateo sin éxito. Retomando patrullaje.");
@@ -92,7 +88,6 @@ public class WolfInvestigateState : State
 
         if (startNode != null && endNode != null)
         {
-            // Llamada limpia sin el Enum, pasando directamente al filtro de nodos seguros
             _path = Pathfinding.AStar(startNode, endNode, node => !node.IsSafeZone);
             _wolf.CurrentActivePath = _path;
         }
@@ -100,16 +95,20 @@ public class WolfInvestigateState : State
 
     private void MoveTowards(Vector3 targetPos)
     {
-        Vector3 dir = (targetPos - _wolf.transform.position).normalized;
-        dir.y = 0f;
+        Vector3 currentPosFlat = new Vector3(_wolf.transform.position.x, 0f, _wolf.transform.position.z);
+        Vector3 targetPosFlat = new Vector3(targetPos.x, 0f, targetPos.z);
+        
+        Vector3 dir = (targetPosFlat - currentPosFlat).normalized;
 
         if (dir.sqrMagnitude > 0.01f)
         {
             Quaternion targetRot = Quaternion.LookRotation(dir);
-            _wolf.transform.rotation = Quaternion.Slerp(_wolf.transform.rotation, targetRot, Time.deltaTime * 10f);
+            _wolf.transform.rotation = Quaternion.Slerp(_wolf.transform.rotation, targetRot, Time.deltaTime * 15f);
         }
 
-        _wolf.transform.position += dir * _wolf.Speed * Time.deltaTime;
+        Vector3 nextPos = _wolf.transform.position + dir * _wolf.Speed * Time.deltaTime;
+        nextPos.y = 0f; 
+        _wolf.transform.position = nextPos;
     }
 
     public override void Exit()

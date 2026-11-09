@@ -19,16 +19,21 @@ public class AttackState : State
 
     public override void Update()
     {
-        if (_targetBoid == null)
+        if (_targetBoid == null || !_targetBoid.gameObject.activeInHierarchy)
         {
             _agent.FSM.ChangeState(_agent.Search);
             return;
         }
 
         Boid boid = _targetBoid.GetComponent<Boid>();
+        if (boid == null)
+        {
+            _agent.FSM.ChangeState(_agent.Search);
+            return;
+        }
 
-       
-        if (boid != null && boid.IsDead)
+        // Si ya está muerto, pasamos directo al estado Gather
+        if (boid.IsDead)
         {
             _agent.DeadTarget = _targetBoid;
             _agent.FSM.ChangeState(_agent.Gather);
@@ -58,31 +63,25 @@ public class AttackState : State
     {
         Debug.Log("Ataque Cuerpo a Cuerpo ejecutado!");
 
-        _agent.currentMeleeTBATimer = 0f;
+        // Reseteamos el timer corporativo usando el método seguro del FSMAgent
+        _agent.ResetMeleeTimer();
+        _agent.StopVelocity();
 
-        if (boid != null)
-        {
-            _agent.StopVelocity();
-
-            boid.TakeDamage(_agent.MeleeAttackDamage);
-        }
+        boid.TakeDamage(_agent.MeleeAttackDamage);
 
         if (boid.IsDead)
         {
             _agent.DeadTarget = _targetBoid;
             _agent.FSM.ChangeState(_agent.Gather);
         }
-        else
-        {
-            _agent.FSM.ChangeState(_agent.Search);
-        }
     }
-    
 
     private void PerformRangedAttack()
     {
         Debug.Log("Disparo A Distancia ejecutado!");
-        _agent.currentRangeTBATimer = 0f;
+        
+        // Reseteamos el timer a distancia usando el método seguro del FSMAgent
+        _agent.ResetRangeTimer();
         _agent.StopVelocity();
         _agent.FireBullet(_targetBoid);
 
@@ -93,12 +92,13 @@ public class AttackState : State
     {
         if (_targetBoid == null) return;
 
-        Vector3 dir = (_targetBoid.position - _agent.transform.position).normalized;
-        dir.y = 0f; 
+        Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
+        Vector3 targetFlatPos = new Vector3(_targetBoid.position.x, 0f, _targetBoid.position.z);
+
+        Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
 
         if (dir.sqrMagnitude > 0.01f)
         {
-            
             Quaternion targetRot = Quaternion.LookRotation(dir);
             _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
         }

@@ -11,6 +11,7 @@ public class HunterExitState : State
 
     public override void Enter()
     {
+        _agent.SetChildColor(Color.blue);
         Debug.Log("Cazador: ¡3 RECOLECCIONES LISTAS! Yendo a la Salida.");
         Node start = Graph.Current.GetClosestNode(_agent.transform.position, false);
         Node exitNode = null;
@@ -34,6 +35,17 @@ public class HunterExitState : State
 
     public override void Update()
     {
+        
+        Transform aliveBoid = null, deadBoid = null, wolf = null;
+        _agent.SenseEnvironment(_agent._viewRadius, ref aliveBoid, ref deadBoid, ref wolf);
+
+        if (wolf != null)
+        {
+            _agent.ThreatTarget = wolf;
+            _agent.FSM.ChangeState(_agent.Flee);
+            return;
+        }
+
         if (_path == null || _pathIndex >= _path.Count)
         {
             Debug.Log("Cazador: ESCAPE EXITOSO. Reiniciando ciclo.");

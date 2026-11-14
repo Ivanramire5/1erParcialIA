@@ -20,6 +20,10 @@ public class Node : MonoBehaviour
     [SerializeField] private bool _isSafeZone = false;
     public bool IsSafeZone => _isSafeZone;
 
+    [Header("Zona de Caza (Destino del Cazador)")]
+    [SerializeField] private bool _isHuntingNode = false;
+    public bool IsHuntingNode => _isHuntingNode;
+
     [Header("Conexiones")]
     [SerializeField] private List<Node> _neighbors = new();
     public List<Node> Neighbors => _neighbors;
@@ -40,7 +44,7 @@ public class Node : MonoBehaviour
     private void OnDrawGizmos()
     {
         
-        Gizmos.color = _isSafeZone ? Color.magenta : (_blocked ? Color.red : Color.yellow);
+        Gizmos.color = _isSafeZone ? Color.magenta : (_blocked ? Color.red : (_isHuntingNode ? Color.cyan : Color.yellow));
         Gizmos.DrawSphere(transform.position, 0.3f);
 
         

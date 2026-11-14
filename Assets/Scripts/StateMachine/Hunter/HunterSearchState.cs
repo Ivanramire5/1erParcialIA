@@ -89,12 +89,32 @@ public class HunterSearchState : State
     private void CalculateNewPath()
     {
         Node start = Graph.Current.GetClosestNode(_agent.transform.position, false);
-        
-        Node end = Graph.Current.AllNodes[Random.Range(0, Graph.Current.AllNodes.Count)];
-        
-        // Llamamos al AStar SOLO con el nodo de inicio y fin, sin el Enum
+        Node end = PickHuntingNode(start);
+
         _path = Pathfinding.AStar(start, end);
         _pathIndex = 0;
+    }
+
+
+    private Node PickHuntingNode(Node current)
+    {
+        List<Node> huntingNodes = new List<Node>();
+
+        foreach (Node node in Graph.Current.AllNodes)
+        {
+            if (node.IsHuntingNode && !node.Blocked && node != current)
+            {
+                huntingNodes.Add(node);
+            }
+        }
+
+        if (huntingNodes.Count == 0)
+        {
+            Debug.LogWarning("Cazador: no hay nodos marcados como IsHuntingNode. Usando un nodo al azar.");
+            return Graph.Current.AllNodes[Random.Range(0, Graph.Current.AllNodes.Count)];
+        }
+
+        return huntingNodes[Random.Range(0, huntingNodes.Count)];
     }
 
     public override void Exit() { }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
+
 
 public class WolfAgent : MonoBehaviour, IGizmoProvider
 {
@@ -12,7 +12,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     [SerializeField] private Transform _hunterTarget; 
     public Transform HunterTarget => _hunterTarget;
 
-    private FSMAgent _hunter;
+  
     [SerializeField] private LayerMask _wallMask; 
     public LayerMask WallMask => _wallMask;       
 

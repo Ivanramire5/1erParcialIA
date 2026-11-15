@@ -519,6 +519,8 @@ GameObject:
   - component: {fileID: 2029925098748036046}
   - component: {fileID: -7768510329919302776}
   - component: {fileID: 7230700116101691720}
+  - component: {fileID: 2451686573789011621}
+  - component: {fileID: 8441933351085454814}
   m_Layer: 6
   m_Name: Hunter
   m_TagString: Hunter
@@ -556,41 +558,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FSMAgent
   Speed: 5
-  _viewRadius: 11
-  obstacleViewDistance: 1
-  obstacleWeight: 5
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  MeleeTBA: 2
-  currentMeleeTBATimer: 0
-  MeleeAttackRadius: 3
-  MeleeAttackDamage: 40
-  HitSignal: {fileID: 1659777941412899153}
-  RangeTBA: 8
-  currentRangeTBATimer: 0
-  RangeAttackRadius: 8
-  childRenderer: {fileID: 3848491024969277321}
-  bulletPrefab: {fileID: 1047690073203459868, guid: 1e8a3b3570640054ebafee2bd478044a, type: 3}
-  spawnBulletPoint: {fileID: 3018724864849219586}
-  maxClamp: 10
-  interestObjectPrefab: {fileID: 3511885797147284625, guid: 5515d52a0309b874491c5b58d63f0697, type: 3}
-  timeToSpawnObject: 15
-  patrolData:
-    waypoints:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    transform: {fileID: 258303370302681368}
-    waypointCheckDistance: 1
-    waitTime: 2
+  maxHealth: 100
+  currentHealth: 0
+  RequiredGathers: 3
+  RespawnTime: 5
+  SafeZoneWaitTime: 4
+  boidsCollected: 0
+  respawnPoint: {fileID: 0}
+  initialPosition: {x: 0, y: 0, z: 0}
   CurrentTarget: {fileID: 6395036296420432531, guid: bb48034b5553f874cb87c17e8d0b9f0b, type: 3}
   DeadTarget: {fileID: 6395036296420432531, guid: bb48034b5553f874cb87c17e8d0b9f0b, type: 3}
+  ThreatTarget: {fileID: 0}
 --- !u!65 &-7768510329919302776
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -639,6 +617,40 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 84
   m_CollisionDetection: 0
+--- !u!114 &2451686573789011621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3858402762093502676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26e8252dbe0d7b04f853024c382de068, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterTrapSpawner
+  _trapPrefab: {fileID: 0}
+  _timeToSpawn: 3
+--- !u!114 &8441933351085454814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3858402762093502676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e9159edf69cf484fb7e4ad4d7dc8eda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterWeapon
+  _meleeCooldown: 2
+  _meleeRadius: 3
+  _meleeDamage: 40
+  _hitSignal: {fileID: 0}
+  _rangeCooldown: 8
+  _rangeRadius: 8
+  _bulletPrefab: {fileID: 0}
+  _bulletSpawnPoint: {fileID: 0}
 --- !u!1 &4391673981238993108
 GameObject:
   m_ObjectHideFlags: 0

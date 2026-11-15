@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class HunterExitState : State 
 {
+    private const float NodeArrivalDistance = 1f;
+
     private readonly FSMAgent _agent;
     private List<Node> _path;
     private int _pathIndex;
@@ -11,59 +13,60 @@ public class HunterExitState : State
 
     public override void Enter()
     {
+        _agent.SetColor(Color.blue);
         Debug.Log("Cazador: ¡3 RECOLECCIONES LISTAS! Yendo a la Salida.");
-        Node start = Graph.Current.GetClosestNode(_agent.transform.position, false);
-        Node exitNode = null;
-        
-        foreach (var node in Graph.Current.AllNodes)
-        {
-            if (node.IsExitNode) 
-            {
-                exitNode = node;
-                break;
-            }
-        }
-
-        if (exitNode != null)
-        {
-            
-            _path = Pathfinding.AStar(start, exitNode);
-            _pathIndex = 0;
-        }
+        CalculatePathToExit();
     }
 
     public override void Update()
     {
-        if (_path == null || _pathIndex >= _path.Count)
+        if (_agent.TryFleeFromWolf()) return;
+
+        if (HasFinishedPath())
         {
-            Debug.Log("Cazador: ESCAPE EXITOSO. Reiniciando ciclo.");
-            _agent.boidsCollected = 0;
-            _agent.transform.position = Vector3.zero; 
-            _agent.FSM.ChangeState(_agent.Search);
+            CompleteEscape();
             return;
         }
 
-        Vector3 targetPos = _path[_pathIndex].transform.position;
-        
-        Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
-        Vector3 targetFlatPos = new Vector3(targetPos.x, 0f, targetPos.z);
+        FollowPath();
+    }
 
-        if (Vector3.Distance(agentFlatPos, targetFlatPos) < 1f)
+    private void CalculatePathToExit()
+    {
+        Node exitNode = FindExitNode();
+        if (exitNode == null) return;
+
+        Node start = Graph.Current.GetClosestVisibleNode(_agent.transform.position);
+        _path = Pathfinding.AStar(start, exitNode);
+        _pathIndex = 0;
+    }
+
+    private Node FindExitNode()
+    {
+        foreach (Node node in Graph.Current.AllNodes)
         {
-            _pathIndex++;
+            if (node.IsExitNode) return node;
         }
-        else
-        {
-            Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
-            
-            if (dir.sqrMagnitude > 0.01f)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(dir);
-                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
-            }
-            
-            _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
-        }
+
+        return null;
+    }
+
+    private bool HasFinishedPath()
+    {
+        return _path == null || _pathIndex >= _path.Count;
+    }
+
+    private void CompleteEscape()
+    {
+        Debug.Log("Cazador: ESCAPE EXITOSO. Reiniciando ciclo.");
+        _agent.boidsCollected = 0;
+        _agent.MoveToRespawn();
+        _agent.FSM.ChangeState(_agent.Search);
+    }
+
+    private void FollowPath()
+    {
+        AgentMovement.MoveAlongPath(_agent.transform, _path, ref _pathIndex, _agent.Speed, NodeArrivalDistance);
     }
 
     public override void Exit() { }

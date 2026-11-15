@@ -24,16 +24,11 @@ public class VisionSensor : MonoBehaviour
     private readonly List<Transform> _detectedObjects = new();
     private readonly List<Transform> _detectedWolves = new();
 
-   
     private float _senseTimer = 0.2f; 
     private readonly float _senseInterval = 0.2f;
     private Transform _cachedHunter;
     private Transform _cachedObject;
     private Transform _cachedWolf;
-
-    public bool HasVisibleHunters => _cachedHunter != null;
-    public bool HasVisibleObjects => _cachedObject != null;
-    public bool HasVisibleWolves => _cachedWolf != null;
 
     private void Awake()
     {
@@ -99,7 +94,17 @@ public class VisionSensor : MonoBehaviour
     public Transform GetClosestVisibleWolf(Vector3 currentPosition) => _cachedWolf;
     public Transform GetClosestVisibleObject(Vector3 currentPosition) => _cachedObject;
 
-    private Transform GetClosestVisibleFromList(List<Transform> list, Vector3 currentPosition)
+    public Transform GetClosestVisibleObject(Vector3 currentPosition, System.Func<Transform, bool> filter)
+    {
+        return GetClosestVisibleFromList(_detectedObjects, currentPosition, filter);
+    }
+
+    public bool IsObjectVisible(Transform target)
+    {
+        return target != null && _detectedObjects.Contains(target) && CanSeeTarget(target);
+    }
+
+    private Transform GetClosestVisibleFromList(List<Transform> list, Vector3 currentPosition, System.Func<Transform, bool> filter = null)
     {
         Transform closest = null;
         float minDistance = Mathf.Infinity;
@@ -114,6 +119,7 @@ public class VisionSensor : MonoBehaviour
                 continue;
             }
 
+            if (filter != null && !filter(target)) continue;
             if (!CanSeeTarget(target)) continue;
 
             float dist = Vector3.Distance(currentPosition, target.position);

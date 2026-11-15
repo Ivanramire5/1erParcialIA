@@ -17,7 +17,6 @@ public class Boid : MonoBehaviour, IGizmoProvider
     [SerializeField] private float _arriveRadius = 2f;
 
     [SerializeField] private float _interactRadius = 1.5f;
-    public float InteractRadius => _interactRadius;
 
     [Header("Flocking Values")]
     [SerializeField] private float _separationRadius = 2f;

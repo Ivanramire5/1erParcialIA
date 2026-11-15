@@ -28,4 +28,11 @@ public class ColorController : MonoBehaviour
         _propBlock.SetColor(ColorPropID, newColor);
         targetRenderer.SetPropertyBlock(_propBlock);
     }
+
+    public void SetVisible(bool isVisible)
+    {
+        if (targetRenderer == null) return;
+
+        targetRenderer.enabled = isVisible;
+    }
 }

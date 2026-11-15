@@ -16,7 +16,7 @@ public class GatherState : State
 
     public override void Enter()
     {
-        _agent.SetChildColor(Color.yellow);
+        _agent.SetColor(Color.yellow);
         Debug.Log("Cazador: Entrando a GATHER");
         _deadBoid = _agent.DeadTarget;
         _gatherTimer = 0f;
@@ -24,61 +24,65 @@ public class GatherState : State
 
     public override void Update()
     {
-        if (_deadBoid == null || !_deadBoid.gameObject.activeInHierarchy)
+        if (_agent.TryFleeFromWolf()) return;
+
+        if (!IsTargetAvailable())
         {
             _agent.FSM.ChangeState(_agent.Search);
             return;
         }
 
-        Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
-        Vector3 targetFlatPos = new Vector3(_deadBoid.position.x, 0f, _deadBoid.position.z);
-        float distance = Vector3.Distance(agentFlatPos, targetFlatPos);
-
-        if (distance > _reachDistance)
+        if (IsTargetInReach())
         {
-
-            Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
-
-            if (dir.sqrMagnitude > 0.01f)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(dir);
-                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
-            }
-
-            _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
+            GatherTarget();
         }
         else
         {
-            _agent.StopVelocity();
-
-            _gatherTimer += Time.deltaTime;
-            if (_gatherTimer >= _timeToGather)
-            {
-                Debug.Log("Boid recolectado exitosamente.");
-
-                Boid boidScript = _deadBoid.GetComponent<Boid>();
-                if (boidScript != null)
-                {
-                    boidScript.OnCollected();
-                }
-                else
-                {
-                    _deadBoid.gameObject.SetActive(false);
-                }
-                
-                _agent.boidsCollected++;
-                Debug.Log($"Boids recolectados: {_agent.boidsCollected}/{_agent.RequiredGathers}");
-
-                if (_agent.boidsCollected >= _agent.RequiredGathers)
-                {
-                    _agent.FSM.ChangeState(_agent.Exit);
-                }
-                else
-                {
-                    _agent.FSM.ChangeState(_agent.Search);
-                }
-            }
+            MoveTowardsTarget();
         }
+    }
+
+    private bool IsTargetAvailable()
+    {
+        return _deadBoid != null && _deadBoid.gameObject.activeInHierarchy;
+    }
+
+    private bool IsTargetInReach()
+    {
+        return AgentMovement.FlatDistance(_agent.transform.position, _deadBoid.position) <= _reachDistance;
+    }
+
+    private void MoveTowardsTarget()
+    {
+        AgentMovement.MoveTowards(_agent.transform, _deadBoid.position, _agent.Speed);
+    }
+
+    private void GatherTarget()
+    {
+        _gatherTimer += Time.deltaTime;
+
+        if (_gatherTimer < _timeToGather) return;
+
+        CollectDeadBoid();
+        _agent.ContinueHuntOrExit();
+    }
+
+    private void CollectDeadBoid()
+    {
+        Debug.Log("Boid recolectado exitosamente.");
+
+        Boid boidScript = _deadBoid.GetComponent<Boid>();
+        if (boidScript != null)
+        {
+            boidScript.OnCollected();
+        }
+        else
+        {
+            _deadBoid.gameObject.SetActive(false);
+        }
+
+        _agent.boidsCollected++;
+        Debug.Log($"Boids recolectados: {_agent.boidsCollected}/{_agent.RequiredGathers}");
     }
 
     public override void Exit()

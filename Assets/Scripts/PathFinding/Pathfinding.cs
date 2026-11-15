@@ -1,4 +1,3 @@
-using System; 
 using System.Collections.Generic; 
 using UnityEngine; 
 
@@ -11,6 +10,11 @@ public static class Pathfinding
     }
 
    
+    private static float GetStepCost(Node from, Node to)
+    {
+        return Vector3.Distance(from.transform.position, to.transform.position) * to.Cost;
+    }
+
     public static List<Node> AStar(Node startingNode, Node endNode, System.Func<Node, bool> nodeFilter = null)
     {
         if (startingNode == null || endNode == null)
@@ -25,8 +29,8 @@ public static class Pathfinding
         Dictionary<Node, Node> cameFrom = new();
         cameFrom.Add(startingNode, null);
 
-        Dictionary<Node, int> costSoFar = new();
-        costSoFar.Add(startingNode, 0);
+        Dictionary<Node, float> costSoFar = new();
+        costSoFar.Add(startingNode, 0f);
 
         Node current;
         Vector3 endPosition = endNode.transform.position;
@@ -52,11 +56,10 @@ public static class Pathfinding
                 if (neighbor.Blocked) continue;
                 if (nodeFilter != null && !nodeFilter(neighbor)) continue;
 
-                int newCost = costSoFar[current] + neighbor.Cost;
+                float newCost = costSoFar[current] + GetStepCost(current, neighbor);
                 
                 if (cameFrom.ContainsKey(neighbor) && newCost >= costSoFar[neighbor]) continue;
                 
-                // Usamos GetHeuristic directamente sin el parámetro enum
                 frontier.Enqueue(neighbor, newCost + GetHeuristic(neighbor.transform.position, endPosition));
                 cameFrom[neighbor] = current;
                 costSoFar[neighbor] = newCost;

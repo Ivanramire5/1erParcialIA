@@ -1,16 +1,15 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WolfInvestigateState : State
 {
+    private const float NodeArrivalDistance = 0.5f;
+
     private readonly WolfAgent _wolf;
-    private List<Node> _path = new List<Node>();
     private int _pathIndex = 0;
-    private Vector3 _targetPosition;
 
     private bool _isSniffing = false;
     private float _sniffTimer = 0f;
-    private readonly float _sniffDuration = 2.5f; 
+    private readonly float _sniffDuration = 2.5f;
 
     public WolfInvestigateState(WolfAgent wolf)
     {
@@ -21,100 +20,76 @@ public class WolfInvestigateState : State
     {
         Debug.Log("Lobo: Entrando a INVESTIGATE. Calculando ruta hacia la alerta.");
         _wolf.SetColor(Color.yellow);
-        
-        _path.Clear();
+
         _pathIndex = 0;
         _isSniffing = false;
         _sniffTimer = 0f;
 
         if (WolfAgent.LastKnownHunterPosition.HasValue)
         {
-            _targetPosition = WolfAgent.LastKnownHunterPosition.Value;
-            CalculateAStarPath(_targetPosition);
+            _wolf.CalculatePathTo(WolfAgent.LastKnownHunterPosition.Value);
         }
     }
 
     public override void Update()
     {
-        if (_wolf.DetectHunter(out Vector3 hunterPos))
+        if (TryChaseHunter()) return;
+
+        if (HasPathToFollow())
         {
-            _wolf.Howl(hunterPos);
-            _wolf.FSM.ChangeState(_wolf.ChaseState);
-            return;
-        }
-
-        if (_path != null && _pathIndex < _path.Count)
-        {
-            Node targetNode = _path[_pathIndex];
-
-            Vector3 wolfPosFlat = new Vector3(_wolf.transform.position.x, 0f, _wolf.transform.position.z);
-            Vector3 targetPosFlat = new Vector3(targetNode.transform.position.x, 0f, targetNode.transform.position.z);
-            float dist = Vector3.Distance(wolfPosFlat, targetPosFlat);
-
-            if (dist <= 0.5f)
-            {
-                _pathIndex++;
-            }
-            else
-            {
-                MoveTowards(targetNode.transform.position);
-            }
+            FollowPath();
         }
         else
         {
-            if (!_isSniffing)
-            {
-                _isSniffing = true;
-                _sniffTimer = 0f;
-                Debug.Log("Lobo: Llegó al punto de alerta. Olfateando el área...");
-                if (_wolf.CurrentActivePath != null) _wolf.CurrentActivePath.Clear();
-            }
-
-            _sniffTimer += Time.deltaTime;
-
-            if (_sniffTimer >= _sniffDuration)
-            {
-                Debug.Log("Lobo: Fin del olfateo sin éxito. Retomando patrullaje.");
-                WolfAgent.ResetAlert();
-                _wolf.FSM.ChangeState(_wolf.PatrolState);
-            }
+            Sniff();
         }
     }
 
-    private void CalculateAStarPath(Vector3 targetPos)
+    private bool TryChaseHunter()
     {
-        Node startNode = Graph.Current.GetClosestNode(_wolf.transform.position, excludeSafeZones: true);
-        Node endNode = Graph.Current.GetClosestNode(targetPos, excludeSafeZones: true);
+        if (!_wolf.DetectHunter(out Vector3 hunterPos)) return false;
 
-        if (startNode != null && endNode != null)
-        {
-            _path = Pathfinding.AStar(startNode, endNode, node => !node.IsSafeZone);
-            _wolf.CurrentActivePath = _path;
-        }
+        _wolf.Howl(hunterPos);
+        _wolf.FSM.ChangeState(_wolf.ChaseState);
+        return true;
     }
 
-    private void MoveTowards(Vector3 targetPos)
+    private bool HasPathToFollow()
     {
-        Vector3 currentPosFlat = new Vector3(_wolf.transform.position.x, 0f, _wolf.transform.position.z);
-        Vector3 targetPosFlat = new Vector3(targetPos.x, 0f, targetPos.z);
-        
-        Vector3 dir = (targetPosFlat - currentPosFlat).normalized;
+        return _pathIndex < _wolf.CurrentActivePath.Count;
+    }
 
-        if (dir.sqrMagnitude > 0.01f)
+    private void FollowPath()
+    {
+        AgentMovement.MoveAlongPath(_wolf.transform, _wolf.CurrentActivePath, ref _pathIndex, _wolf.Speed, NodeArrivalDistance);
+    }
+
+    private void Sniff()
+    {
+        if (!_isSniffing)
         {
-            Quaternion targetRot = Quaternion.LookRotation(dir);
-            _wolf.transform.rotation = Quaternion.Slerp(_wolf.transform.rotation, targetRot, Time.deltaTime * 15f);
+            StartSniffing();
         }
 
-        Vector3 nextPos = _wolf.transform.position + dir * _wolf.Speed * Time.deltaTime;
-        nextPos.y = 0f; 
-        _wolf.transform.position = nextPos;
+        _sniffTimer += Time.deltaTime;
+        if (_sniffTimer < _sniffDuration) return;
+
+        Debug.Log("Lobo: Fin del olfateo sin éxito. Retomando patrullaje.");
+        WolfAgent.ResetAlert();
+        _wolf.FSM.ChangeState(_wolf.PatrolState);
+    }
+
+    private void StartSniffing()
+    {
+        _isSniffing = true;
+        _sniffTimer = 0f;
+        Debug.Log("Lobo: Llegó al punto de alerta. Olfateando el área...");
+        _wolf.ClearPath();
     }
 
     public override void Exit()
     {
         Debug.Log("Lobo: Saliendo de INVESTIGATE.");
-        _path.Clear();
-        if (_wolf.CurrentActivePath != null) _wolf.CurrentActivePath.Clear();
+        _wolf.ClearPath();
     }
 }

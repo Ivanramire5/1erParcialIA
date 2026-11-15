@@ -61,19 +61,11 @@ public class Graph : MonoBehaviour
                 float distance = Vector3.Distance(nodeA.transform.position, nodeB.transform.position);
 
                 
-                if (distance <= _maxConnectionDistance)
+                if (distance <= _maxConnectionDistance && HasClearPath(nodeA.transform.position, nodeB.transform.position))
                 {
-                   
-                    Vector3 posA = nodeA.transform.position + Vector3.up * 0.5f;
-                    Vector3 posB = nodeB.transform.position + Vector3.up * 0.5f;
-
-                   
-                    if (!Physics.Linecast(posA, posB, _wallMask))
-                    {
-                        nodeA.AddNeighbor(nodeB);
-                        nodeB.AddNeighbor(nodeA);
-                        totalConnections += 2;
-                    }
+                    nodeA.AddNeighbor(nodeB);
+                    nodeB.AddNeighbor(nodeA);
+                    totalConnections += 2;
                 }
             }
         }
@@ -118,5 +110,32 @@ public class Graph : MonoBehaviour
         }
 
         return closestNode;
+    }
+
+    public Node GetClosestVisibleNode(Vector3 position, bool excludeSafeZones = false)
+    {
+        Node closestNode = null;
+        float minSqDistance = Mathf.Infinity;
+
+        foreach (Node node in _nodes)
+        {
+            if (node == null || node.Blocked) continue;
+            if (excludeSafeZones && node.IsSafeZone) continue;
+
+            float sqDist = (node.transform.position - position).sqrMagnitude;
+            if (sqDist >= minSqDistance) continue;
+            if (!HasClearPath(position, node.transform.position)) continue;
+
+            minSqDistance = sqDist;
+            closestNode = node;
+        }
+
+        return closestNode != null ? closestNode : GetClosestNode(position, excludeSafeZones);
+    }
+
+    public bool HasClearPath(Vector3 from, Vector3 to)
+    {
+        Vector3 offset = Vector3.up * 0.5f;
+        return !Physics.Linecast(from + offset, to + offset, _wallMask);
     }
 }

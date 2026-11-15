@@ -1,33 +1,28 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WolfPatrolState : State
 {
+    private const float NodeArrivalDistance = 0.5f;
+
     private readonly WolfAgent _wolf;
     private int _waypointIndex = 0;
-  
-    private List<Node> _currentPath = new List<Node>();
     private int _pathIndex = 0;
 
     public WolfPatrolState(WolfAgent wolf)
     {
         _wolf = wolf;
-
     }
-    
+
     public override void Enter()
     {
         Debug.Log("Lobo: Entrando a estado PATROL");
-        _currentPath.Clear();
         _wolf.SetColor(Color.green);
-        
     }
 
     public override void Update()
     {
-      
         if (_wolf.DetectHunter(out Vector3 hunterPos))
-        {            
+        {
             _wolf.Howl(hunterPos);
             _wolf.FSM.ChangeState(_wolf.ChaseState);
             return;
@@ -38,84 +33,69 @@ public class WolfPatrolState : State
             _wolf.FSM.ChangeState(_wolf.InvestigateState);
             return;
         }
-         
-       
+
         PatrolBehavior();
     }
 
     private void PatrolBehavior()
     {
         if (_wolf.waypoints == null || _wolf.waypoints.Count == 0) return;
-      
-        Transform targetWaypoint = _wolf.waypoints[_waypointIndex];
-        float distanceToWaypoint = Vector3.Distance(_wolf.transform.position, targetWaypoint.position);
 
-        if (distanceToWaypoint <= _wolf.WaypointCheckDistance)
+        if (HasReachedWaypoint())
         {
-            _waypointIndex = (_waypointIndex + 1) % _wolf.waypoints.Count;
-            targetWaypoint = _wolf.waypoints[_waypointIndex];
-            _currentPath.Clear();
+            GoToNextWaypoint();
         }
 
-    
-        bool hasLineOfSight = !Physics.Linecast(_wolf.transform.position, targetWaypoint.position, _wolf.WallMask);
-
-        if (hasLineOfSight)
-        {
-            _currentPath.Clear();
-            MoveTowards(targetWaypoint.position);
-        }
-        else
-        {
-            if (_currentPath == null || _currentPath.Count == 0)
-            {
-                Node startNode = Graph.Current.GetClosestNode(_wolf.transform.position);
-                Node endNode = Graph.Current.GetClosestNode(targetWaypoint.position);
-
-                _currentPath = Pathfinding.AStar(startNode, endNode);
-                _wolf.CurrentActivePath = _currentPath;
-                _pathIndex = 0;
-            }
-
-            if (_currentPath != null && _pathIndex < _currentPath.Count)
-            {
-                Node targetNode = _currentPath[_pathIndex];
-
-               
-                Vector3 wolfPosFlat = new Vector3(_wolf.transform.position.x, 0f, _wolf.transform.position.z);
-                Vector3 targetPosFlat = new Vector3(targetNode.transform.position.x, 0f, targetNode.transform.position.z);
-                float distToNode = Vector3.Distance(wolfPosFlat, targetPosFlat);
-
-                if (distToNode <= 0.5f)
-                {
-                    _pathIndex++;
-                }
-                else
-                {
-                    MoveTowards(targetNode.transform.position);
-                }
-            }
-        }
+        FollowPathTo(GetCurrentWaypoint().position);
     }
 
-    private void MoveTowards(Vector3 targetPos)
+    private Transform GetCurrentWaypoint()
     {
-        Vector3 dir = (targetPos - _wolf.transform.position).normalized;
-        dir.y = 0f;
+        return _wolf.waypoints[_waypointIndex];
+    }
 
-        if (dir.sqrMagnitude > 0.01f)
+    private bool HasReachedWaypoint()
+    {
+        float distance = Vector3.Distance(_wolf.transform.position, GetCurrentWaypoint().position);
+        return distance <= _wolf.WaypointCheckDistance;
+    }
+
+    private void GoToNextWaypoint()
+    {
+        _waypointIndex = (_waypointIndex + 1) % _wolf.waypoints.Count;
+        _wolf.ClearPath();
+    }
+
+    private void FollowPathTo(Vector3 destination)
+    {
+        if (_wolf.CurrentActivePath.Count == 0)
         {
-            Quaternion targetRot = Quaternion.LookRotation(dir);
-            _wolf.transform.rotation = Quaternion.Slerp(_wolf.transform.rotation, targetRot, Time.deltaTime * 10f);
+            CalculatePathTo(destination);
         }
 
-        _wolf.transform.position += dir * _wolf.Speed * Time.deltaTime;
+        if (HasNodesLeftInPath())
+        {
+            AgentMovement.MoveAlongPath(_wolf.transform, _wolf.CurrentActivePath, ref _pathIndex, _wolf.Speed, NodeArrivalDistance);
+            return;
+        }
+
+        AgentMovement.MoveTowards(_wolf.transform, destination, _wolf.Speed);
+    }
+
+    private bool HasNodesLeftInPath()
+    {
+        return _pathIndex < _wolf.CurrentActivePath.Count;
+    }
+
+    private void CalculatePathTo(Vector3 destination)
+    {
+        _wolf.CalculatePathTo(destination);
+        _pathIndex = 0;
     }
 
     public override void Exit()
     {
         Debug.Log("Lobo: Saliendo de PATROL");
-        _currentPath.Clear();
-        _wolf.CurrentActivePath.Clear();
+        _wolf.ClearPath();
     }
 }

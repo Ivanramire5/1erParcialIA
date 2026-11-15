@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class HunterSearchState : State 
 {
+    private const float NodeArrivalDistance = 1f;
+
     private readonly FSMAgent _agent;
     private List<Node> _path;
     private int _pathIndex;
@@ -11,90 +13,67 @@ public class HunterSearchState : State
 
     public override void Enter()
     {
+        _agent.GetComponent<Collider>().enabled = true;
+        _agent.SetVisible(true);
         Debug.Log("Cazador: Entrando a Search (Navegando con A*)");
-        _agent.SetChildColor(Color.blue);
+        _agent.SetColor(Color.blue);
         CalculateNewPath();
     }
 
     public override void Update()
     {
-        Transform aliveBoid = null, deadBoid = null, wolf = null;
-        
+        if (_agent.TryFleeFromWolf()) return;
 
-        _agent.SenseEnvironment(_agent._viewRadius, ref aliveBoid, ref deadBoid, ref wolf);
-
-        
-        if (wolf != null)
-        {
-            _agent.ThreatTarget = wolf;
-            _agent.FSM.ChangeState(_agent.Flee);
-            return;
-        }
-        if (deadBoid != null)
-        {
-            _agent.DeadTarget = deadBoid;
-            _agent.FSM.ChangeState(_agent.Gather);
-            return;
-        }
-
-        
-        bool canAttack = _agent.currentMeleeTBATimer >= _agent.MeleeTBA || _agent.currentRangeTBATimer >= _agent.RangeTBA;
-        
-        if (aliveBoid != null && canAttack)
-        {
-            _agent.CurrentTarget = aliveBoid;
-            _agent.FSM.ChangeState(_agent.Attack);
-            return;
-        }
-
+        if (TryStartGathering(_agent.GetVisibleDeadBoid())) return;
+        if (TryStartAttacking(_agent.GetVisibleAliveBoid())) return;
 
         FollowPath();
-        
+        _agent.TrapSpawner.TrySpawnTrap();
+    }
 
-        _agent.TrySpawnInterestObject();
+    private bool TryStartGathering(Transform deadBoid)
+    {
+        if (deadBoid == null) return false;
+
+        _agent.DeadTarget = deadBoid;
+        _agent.FSM.ChangeState(_agent.Gather);
+        return true;
+    }
+
+    private bool TryStartAttacking(Transform aliveBoid)
+    {
+        if (aliveBoid == null) return false;
+        if (!_agent.Weapon.CanMeleeAttack && !_agent.Weapon.CanRangeAttack) return false;
+
+        _agent.CurrentTarget = aliveBoid;
+        _agent.FSM.ChangeState(_agent.Attack);
+        return true;
     }
 
     private void FollowPath()
     {
-        if (_path == null || _pathIndex >= _path.Count)
+        if (HasFinishedPath())
         {
-            CalculateNewPath(); 
+            CalculateNewPath();
             return;
         }
 
-        Vector3 targetPos = _path[_pathIndex].transform.position;
-        Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
-        Vector3 targetFlatPos = new Vector3(targetPos.x, 0f, targetPos.z);
+        AgentMovement.MoveAlongPath(_agent.transform, _path, ref _pathIndex, _agent.Speed, NodeArrivalDistance);
+    }
 
-        if (Vector3.Distance(agentFlatPos, targetFlatPos) < 1f)
-        {
-            _pathIndex++; 
-        }
-        else
-        {
-            
-            Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
-            
-            if (dir.sqrMagnitude > 0.01f)
-            {
-                
-                Quaternion targetRot = Quaternion.LookRotation(dir);
-                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
-            }
-            
-            _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
-        }
+    private bool HasFinishedPath()
+    {
+        return _path == null || _pathIndex >= _path.Count;
     }
 
     private void CalculateNewPath()
     {
-        Node start = Graph.Current.GetClosestNode(_agent.transform.position, false);
+        Node start = Graph.Current.GetClosestVisibleNode(_agent.transform.position);
         Node end = PickHuntingNode(start);
 
         _path = Pathfinding.AStar(start, end);
         _pathIndex = 0;
     }
-
 
     private Node PickHuntingNode(Node current)
     {
@@ -106,12 +85,6 @@ public class HunterSearchState : State
             {
                 huntingNodes.Add(node);
             }
-        }
-
-        if (huntingNodes.Count == 0)
-        {
-            Debug.LogWarning("Cazador: no hay nodos marcados como IsHuntingNode. Usando un nodo al azar.");
-            return Graph.Current.AllNodes[Random.Range(0, Graph.Current.AllNodes.Count)];
         }
 
         return huntingNodes[Random.Range(0, huntingNodes.Count)];

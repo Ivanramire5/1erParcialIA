@@ -14,17 +14,6 @@ public class Bounds : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    public Vector3 OutOfBounds(Vector3 position) 
-    {
-        Vector3 newPosition = position;
-
-        if (position.x > _width / 2) newPosition.x = -_width / 2;
-        if (position.x < -_width/2 ) newPosition.x = _width / 2;
-        if(position.z > _height / 2) newPosition.z = -_height / 2;
-        if( position.z < -_height/2 ) newPosition.z= _height / 2;
-
-        return newPosition;
-    }
     public Vector3 CalculateBoundPosition(Vector3 position) 
     {
         Vector3 newPosition = position;

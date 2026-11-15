@@ -3,7 +3,7 @@ using UnityEngine;
 public class AttackState : State
 {
     private readonly FSMAgent _agent;
-    public Transform _targetBoid;
+    private Transform _targetBoid;
 
     public AttackState(FSMAgent agent)
     {
@@ -13,49 +13,63 @@ public class AttackState : State
     public override void Enter()
     {
         Debug.Log("Cazador: Entrando a ATTACK!");
-        _agent.SetChildColor(Color.red);
+        _agent.SetColor(Color.red);
         _targetBoid = _agent.CurrentTarget;
     }
 
     public override void Update()
     {
-        if (_targetBoid == null || !_targetBoid.gameObject.activeInHierarchy)
+        if (_agent.TryFleeFromWolf()) return;
+
+        Boid boid = GetTargetBoid();
+        if (boid == null || !_agent.CanSee(_targetBoid))
         {
             _agent.FSM.ChangeState(_agent.Search);
             return;
         }
 
-        Boid boid = _targetBoid.GetComponent<Boid>();
-        if (boid == null)
-        {
-            _agent.FSM.ChangeState(_agent.Search);
-            return;
-        }
-
-        // Si ya está muerto, pasamos directo al estado Gather
         if (boid.IsDead)
         {
-            _agent.DeadTarget = _targetBoid;
-            _agent.FSM.ChangeState(_agent.Gather);
+            StartGathering();
             return;
         }
 
-        float distanceToTarget = Vector3.Distance(_agent.transform.position, _targetBoid.position);
+        AttackOrPursue(boid);
+    }
 
-        bool canMelee = _agent.currentMeleeTBATimer >= _agent.MeleeTBA;
-        bool canRange = _agent.currentRangeTBATimer >= _agent.RangeTBA;
+    private Boid GetTargetBoid()
+    {
+        if (_targetBoid == null || !_targetBoid.gameObject.activeInHierarchy) return null;
 
-        if (distanceToTarget <= _agent.MeleeAttackRadius && canMelee)
+        return _targetBoid.GetComponent<Boid>();
+    }
+
+    private void StartGathering()
+    {
+        _agent.DeadTarget = _targetBoid;
+        _agent.FSM.ChangeState(_agent.Gather);
+    }
+
+    private void AttackOrPursue(Boid boid)
+    {
+        HunterWeapon weapon = _agent.Weapon;
+        float distance = Vector3.Distance(_agent.transform.position, _targetBoid.position);
+
+        if (weapon.CanMeleeAttack && distance <= weapon.MeleeRadius)
         {
             PerformMeleeAttack(boid);
         }
-        else if (distanceToTarget <= _agent.RangeAttackRadius && canRange)
+        else if (weapon.CanRangeAttack && distance <= weapon.RangeRadius)
         {
             PerformRangedAttack();
         }
-        else
+        else if (weapon.CanMeleeAttack || weapon.CanRangeAttack)
         {
             PursueTarget();
+        }
+        else
+        {
+            FaceTarget();
         }
     }
 
@@ -63,47 +77,29 @@ public class AttackState : State
     {
         Debug.Log("Ataque Cuerpo a Cuerpo ejecutado!");
 
-        // Reseteamos el timer corporativo usando el método seguro del FSMAgent
-        _agent.ResetMeleeTimer();
-        _agent.StopVelocity();
-
-        boid.TakeDamage(_agent.MeleeAttackDamage);
+        _agent.Weapon.MeleeAttack(boid);
 
         if (boid.IsDead)
         {
-            _agent.DeadTarget = _targetBoid;
-            _agent.FSM.ChangeState(_agent.Gather);
+            StartGathering();
         }
     }
 
     private void PerformRangedAttack()
     {
         Debug.Log("Disparo A Distancia ejecutado!");
-        
-        // Reseteamos el timer a distancia usando el método seguro del FSMAgent
-        _agent.ResetRangeTimer();
-        _agent.StopVelocity();
-        _agent.FireBullet(_targetBoid);
 
-        PursueTarget();
+        _agent.Weapon.ShootAt(_targetBoid);
     }
 
     private void PursueTarget()
     {
-        if (_targetBoid == null) return;
+        AgentMovement.MoveTowards(_agent.transform, _targetBoid.position, _agent.Speed);
+    }
 
-        Vector3 agentFlatPos = new Vector3(_agent.transform.position.x, 0f, _agent.transform.position.z);
-        Vector3 targetFlatPos = new Vector3(_targetBoid.position.x, 0f, _targetBoid.position.z);
-
-        Vector3 dir = (targetFlatPos - agentFlatPos).normalized;
-
-        if (dir.sqrMagnitude > 0.01f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(dir);
-            _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRot, Time.deltaTime * 15f);
-        }
-
-        _agent.transform.position += dir * _agent.Speed * Time.deltaTime;
+    private void FaceTarget()
+    {
+        AgentMovement.FaceTowards(_agent.transform, _targetBoid.position);
     }
 
     public override void Exit()

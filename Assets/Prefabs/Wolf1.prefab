@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1700500515090003133}
   - component: {fileID: 5798717654526147047}
   - component: {fileID: 195157558730662195}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: WolfHead
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 8283508407006940339}
   - component: {fileID: 4621485559748458283}
   - component: {fileID: 7300139528500692567}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Wolf1
   m_TagString: Wolf
   m_Icon: {fileID: 0}
@@ -162,10 +162,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WolfAgent
   _speed: 4
-  HunterTarget: {fileID: 0}
-  WallMask:
-    serializedVersion: 2
-    m_Bits: 256
+  _captureRadius: 2.5
+  _hunterTarget: {fileID: 0}
   waypoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -256,7 +254,7 @@ GameObject:
   - component: {fileID: 4390117859855220404}
   - component: {fileID: 8079841659381645732}
   - component: {fileID: 8559481952461865487}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: WolfBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}

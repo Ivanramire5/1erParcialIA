@@ -1,25 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class WolfAgent : MonoBehaviour, IGizmoProvider
 {
     [Header("Stats")]
     [SerializeField] private float _speed = 4f;
     public float Speed => _speed;
 
+    [SerializeField] private float _captureRadius = 2.5f;
+    public float CaptureRadius => _captureRadius;
+
     [Header("Percepcion y referencias")]
     [SerializeField] private Transform _hunterTarget; 
     public Transform HunterTarget => _hunterTarget;
 
-  
-    [SerializeField] private LayerMask _wallMask; 
-    public LayerMask WallMask => _wallMask;       
-
     private VisionSensor _visionSensor;
     private ColorController _colorController;
-    [Header("Feedback Visual")]
-
 
     [Header("Patrulla")]
     public List<Transform> waypoints;
@@ -28,7 +24,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     public static Vector3? LastKnownHunterPosition { get; private set; }
     public static bool IsAlerted { get; private set; }
 
-    public List<Node> CurrentActivePath { get; set; } = new();
+    public List<Node> CurrentActivePath { get; private set; } = new();
 
     private readonly FiniteStateMachine _fsm = new();
     public FiniteStateMachine FSM => _fsm;
@@ -39,19 +35,21 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
 
     private void Awake()
     {
-       
         _colorController = GetComponent<ColorController>();
         _visionSensor = GetComponentInChildren<VisionSensor>();
-
-        
     }
 
     private void Start()
     {
+        InicializarFSM();
+    }
+
+    private void InicializarFSM()
+    {
         PatrolState = new WolfPatrolState(this);
         ChaseState = new WolfChaseState(this);
         InvestigateState = new WolfInvestigateState(this);
-     
+
         _fsm.AddState(PatrolState);
         _fsm.AddState(ChaseState);
         _fsm.AddState(InvestigateState);
@@ -68,7 +66,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     {
         LastKnownHunterPosition = hunterPos;
         IsAlerted = true;
-       
+
         Debug.Log("¡AULLIDO DE LOBO! ¡Cazador detectado en " + hunterPos + "!");
     }
 
@@ -78,8 +76,8 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         {
             _colorController.SetColor(newColor);
         }
-      
     }
+
     public void SetHunterTarget(Transform newTarget)
     {
         _hunterTarget = newTarget;
@@ -90,10 +88,27 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         IsAlerted = false;
         LastKnownHunterPosition = null;
     }
-  
+
+    public void CalculatePathTo(Vector3 destination)
+    {
+        Node startNode = Graph.Current.GetClosestVisibleNode(transform.position, excludeSafeZones: true);
+        Node endNode = Graph.Current.GetClosestVisibleNode(destination, excludeSafeZones: true);
+
+        CurrentActivePath = Pathfinding.AStar(startNode, endNode, node => !node.IsSafeZone);
+    }
+
+    public void ClearPath()
+    {
+        CurrentActivePath.Clear();
+    }
+
+    public bool HasLineOfSightTo(Vector3 target)
+    {
+        return Graph.Current.HasClearPath(transform.position, target);
+    }
+
     public bool DetectHunter(out Vector3 hunterPos)
     {
-       
         hunterPos = default;
         if (_visionSensor == null) return false;
 
@@ -101,10 +116,8 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
 
         if (closestHunter != null)
         {
-           
             FSMAgent hunterComponent = closestHunter.GetComponentInParent<FSMAgent>();
 
-      
             if (hunterComponent != null && hunterComponent.IsDead)
             {
                 return false;
@@ -118,13 +131,12 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         return false;
     }
 
-   
     public bool IsHunterInSafeZone()
     {
         if (HunterTarget == null)
         {
             GameObject hunterObj = GameObject.FindWithTag("Hunter");
-            if (hunterObj != null) SetHunterTarget(hunterObj.transform) ;
+            if (hunterObj != null) SetHunterTarget(hunterObj.transform);
         }
 
         if (HunterTarget != null && Graph.Current != null)
@@ -157,5 +169,4 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
             yield return new GizmoData(pathPositions, Color.yellow);
         }
     }
-
 }

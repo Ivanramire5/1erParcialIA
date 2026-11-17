@@ -31,7 +31,7 @@ public class WolfChaseState : State
 
         if (!_wolf.HasLineOfSightTo(hunterPos)) return;
 
-        AgentMovement.MoveTowards(_wolf.transform, hunterPos, _wolf.Speed);
+        _wolf.MoveTowards(hunterPos);
         TryCatchHunter(hunterPos);
     }
 

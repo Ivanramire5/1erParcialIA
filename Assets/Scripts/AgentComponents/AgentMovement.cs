@@ -5,16 +5,21 @@ public static class AgentMovement
 {
     private const float TurnSpeed = 15f;
 
-    public static void MoveTowards(Transform agent, Vector3 targetPosition, float speed)
+    public static void MoveTowards(Transform agent, Vector3 targetPosition, float speed, ObstacleAvoidance avoidance = null)
     {
         Vector3 direction = GetFlatDirection(agent.position, targetPosition);
         if (direction.sqrMagnitude < 0.01f) return;
+
+        if (avoidance != null)
+        {
+            direction = avoidance.AvoidObstacles(agent.position, direction, FlatDistance(agent.position, targetPosition));
+        }
 
         RotateTowards(agent, direction);
         agent.position += direction * speed * Time.deltaTime;
     }
 
-    public static void MoveAlongPath(Transform agent, List<Node> path, ref int pathIndex, float speed, float arrivalDistance)
+    public static void MoveAlongPath(Transform agent, List<Node> path, ref int pathIndex, float speed, float arrivalDistance, ObstacleAvoidance avoidance = null)
     {
         Vector3 nodePosition = path[pathIndex].transform.position;
 
@@ -24,7 +29,7 @@ public static class AgentMovement
             return;
         }
 
-        MoveTowards(agent, nodePosition, speed);
+        MoveTowards(agent, nodePosition, speed, avoidance);
     }
 
     public static void FaceTowards(Transform agent, Vector3 targetPosition)

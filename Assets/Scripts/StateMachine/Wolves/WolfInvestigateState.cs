@@ -2,10 +2,7 @@ using UnityEngine;
 
 public class WolfInvestigateState : State
 {
-    private const float NodeArrivalDistance = 0.5f;
-
     private readonly WolfAgent _wolf;
-    private int _pathIndex = 0;
 
     private bool _isSniffing = false;
     private float _sniffTimer = 0f;
@@ -21,7 +18,6 @@ public class WolfInvestigateState : State
         Debug.Log("Lobo: Entrando a INVESTIGATE. Calculando ruta hacia la alerta.");
         _wolf.SetColor(Color.yellow);
 
-        _pathIndex = 0;
         _isSniffing = false;
         _sniffTimer = 0f;
 
@@ -35,9 +31,9 @@ public class WolfInvestigateState : State
     {
         if (TryChaseHunter()) return;
 
-        if (HasPathToFollow())
+        if (_wolf.HasPathToFollow)
         {
-            FollowPath();
+            _wolf.FollowPath();
         }
         else
         {
@@ -52,16 +48,6 @@ public class WolfInvestigateState : State
         _wolf.Howl(hunterPos);
         _wolf.FSM.ChangeState(_wolf.ChaseState);
         return true;
-    }
-
-    private bool HasPathToFollow()
-    {
-        return _pathIndex < _wolf.CurrentActivePath.Count;
-    }
-
-    private void FollowPath()
-    {
-        AgentMovement.MoveAlongPath(_wolf.transform, _wolf.CurrentActivePath, ref _pathIndex, _wolf.Speed, NodeArrivalDistance);
     }
 
     private void Sniff()

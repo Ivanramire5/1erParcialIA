@@ -7,6 +7,8 @@ using UnityEditor;
 
 public class Graph : MonoBehaviour
 {
+    private static readonly Vector3 CastOffset = Vector3.up * 0.5f;
+
     public static Graph Current { get; private set; }
 
     public List<Node> AllNodes => _nodes;
@@ -88,31 +90,7 @@ public class Graph : MonoBehaviour
         return node.Neighbors;
     }
 
-
-    public Node GetClosestNode(Vector3 position, bool excludeSafeZones = false)
-    {
-        Node closestNode = null;
-        float minSqDistance = Mathf.Infinity;
-
-        foreach (Node node in _nodes)
-        {
-            if (node == null || node.Blocked) continue;
-
-          
-            if (excludeSafeZones && node.IsSafeZone) continue;
-
-            float sqDist = (node.transform.position - position).sqrMagnitude;
-            if (sqDist < minSqDistance)
-            {
-                minSqDistance = sqDist;
-                closestNode = node;
-            }
-        }
-
-        return closestNode;
-    }
-
-    public Node GetClosestVisibleNode(Vector3 position, bool excludeSafeZones = false)
+    public Node GetClosestNode(Vector3 position, bool excludeSafeZones = false, bool mustBeVisible = false)
     {
         Node closestNode = null;
         float minSqDistance = Mathf.Infinity;
@@ -124,18 +102,34 @@ public class Graph : MonoBehaviour
 
             float sqDist = (node.transform.position - position).sqrMagnitude;
             if (sqDist >= minSqDistance) continue;
-            if (!HasClearPath(position, node.transform.position)) continue;
+            if (mustBeVisible && !HasClearPath(position, node.transform.position)) continue;
 
             minSqDistance = sqDist;
             closestNode = node;
         }
 
-        return closestNode != null ? closestNode : GetClosestNode(position, excludeSafeZones);
+        return closestNode;
+    }
+
+    public Node GetClosestVisibleNode(Vector3 position, bool excludeSafeZones = false)
+    {
+        Node visibleNode = GetClosestNode(position, excludeSafeZones, mustBeVisible: true);
+        return visibleNode != null ? visibleNode : GetClosestNode(position, excludeSafeZones);
+    }
+
+    public bool IsInSafeZone(Vector3 position)
+    {
+        Node closestNode = GetClosestNode(position);
+        return closestNode != null && closestNode.IsSafeZone;
     }
 
     public bool HasClearPath(Vector3 from, Vector3 to)
     {
-        Vector3 offset = Vector3.up * 0.5f;
-        return !Physics.Linecast(from + offset, to + offset, _wallMask);
+        return !Physics.Linecast(from + CastOffset, to + CastOffset, _wallMask);
+    }
+
+    public bool IsWallAhead(Vector3 origin, Vector3 direction, float radius, float distance, out RaycastHit hit)
+    {
+        return Physics.SphereCast(origin + CastOffset, radius, direction, out hit, distance, _wallMask);
     }
 }

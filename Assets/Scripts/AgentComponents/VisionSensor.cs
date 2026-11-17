@@ -137,25 +137,31 @@ public class VisionSensor : MonoBehaviour
 
     private bool CanSeeTarget(Transform target)
     {
-        if (IsAValidTarget(target.gameObject.layer, _hunterMask))
-        {
-            if (Graph.Current != null)
-            {
-                Node closestNode = Graph.Current.GetClosestNode(target.position);
-              
-                if (closestNode != null && closestNode.IsSafeZone)
-                {
-                    return false;
-                }
-            }
-        }
+        if (IsHunterInSafeZone(target)) return false;
 
-        Vector3 dirToTarget = (target.position - transform.position).normalized;
-        if (Vector3.Angle(transform.forward, dirToTarget) > _viewAngle /2f)
-        {
-            return false;
-        }
+        return InRange(target.position) && InViewAngle(target.position) && InLineOfSight(target);
+    }
 
+    private bool IsHunterInSafeZone(Transform target)
+    {
+        if (!IsAValidTarget(target.gameObject.layer, _hunterMask) || Graph.Current == null) return false;
+
+        return Graph.Current.IsInSafeZone(target.position);
+    }
+
+    private bool InRange(Vector3 targetPosition)
+    {
+        return Vector3.Distance(targetPosition, transform.position) <= ViewRadius;
+    }
+
+    private bool InViewAngle(Vector3 targetPosition)
+    {
+        Vector3 dirToTarget = (targetPosition - transform.position).normalized;
+        return Vector3.Angle(transform.forward, dirToTarget) <= _viewAngle / 2f;
+    }
+
+    private bool InLineOfSight(Transform target)
+    {
         Vector3 eyePos = transform.position + Vector3.up * _eyeHeight;
         Vector3 targetPos = target.position + Vector3.up * _eyeHeight;
         Vector3 direction = targetPos - eyePos;

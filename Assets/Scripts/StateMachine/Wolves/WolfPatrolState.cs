@@ -2,11 +2,8 @@ using UnityEngine;
 
 public class WolfPatrolState : State
 {
-    private const float NodeArrivalDistance = 0.5f;
-
     private readonly WolfAgent _wolf;
     private int _waypointIndex = 0;
-    private int _pathIndex = 0;
 
     public WolfPatrolState(WolfAgent wolf)
     {
@@ -70,27 +67,16 @@ public class WolfPatrolState : State
     {
         if (_wolf.CurrentActivePath.Count == 0)
         {
-            CalculatePathTo(destination);
+            _wolf.CalculatePathTo(destination);
         }
 
-        if (HasNodesLeftInPath())
+        if (_wolf.HasPathToFollow)
         {
-            AgentMovement.MoveAlongPath(_wolf.transform, _wolf.CurrentActivePath, ref _pathIndex, _wolf.Speed, NodeArrivalDistance);
+            _wolf.FollowPath();
             return;
         }
 
-        AgentMovement.MoveTowards(_wolf.transform, destination, _wolf.Speed);
-    }
-
-    private bool HasNodesLeftInPath()
-    {
-        return _pathIndex < _wolf.CurrentActivePath.Count;
-    }
-
-    private void CalculatePathTo(Vector3 destination)
-    {
-        _wolf.CalculatePathTo(destination);
-        _pathIndex = 0;
+        _wolf.MoveTowards(destination);
     }
 
     public override void Exit()

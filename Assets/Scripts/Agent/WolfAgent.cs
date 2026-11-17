@@ -3,15 +3,16 @@ using UnityEngine;
 
 public class WolfAgent : MonoBehaviour, IGizmoProvider
 {
+    private const float NodeArrivalDistance = 0.5f;
+
     [Header("Stats")]
     [SerializeField] private float _speed = 4f;
-    public float Speed => _speed;
 
     [SerializeField] private float _captureRadius = 2.5f;
     public float CaptureRadius => _captureRadius;
 
-    [Header("Percepcion y referencias")]
-    [SerializeField] private Transform _hunterTarget; 
+   
+     private Transform _hunterTarget; 
     public Transform HunterTarget => _hunterTarget;
 
     private VisionSensor _visionSensor;
@@ -21,10 +22,15 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
     public List<Transform> waypoints;
     public float WaypointCheckDistance = 2f;
 
+    [Header("Esquive de Obstaculos")]
+    [SerializeField] private ObstacleAvoidance _obstacleAvoidance = new();
+
     public static Vector3? LastKnownHunterPosition { get; private set; }
     public static bool IsAlerted { get; private set; }
 
     public List<Node> CurrentActivePath { get; private set; } = new();
+    public bool HasPathToFollow => _pathIndex < CurrentActivePath.Count;
+    private int _pathIndex;
 
     private readonly FiniteStateMachine _fsm = new();
     public FiniteStateMachine FSM => _fsm;
@@ -78,7 +84,7 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         }
     }
 
-    public void SetHunterTarget(Transform newTarget)
+    private void SetHunterTarget(Transform newTarget)
     {
         _hunterTarget = newTarget;
     }
@@ -95,11 +101,23 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
         Node endNode = Graph.Current.GetClosestVisibleNode(destination, excludeSafeZones: true);
 
         CurrentActivePath = Pathfinding.AStar(startNode, endNode, node => !node.IsSafeZone);
+        _pathIndex = 0;
     }
 
     public void ClearPath()
     {
         CurrentActivePath.Clear();
+        _pathIndex = 0;
+    }
+
+    public void FollowPath()
+    {
+        AgentMovement.MoveAlongPath(transform, CurrentActivePath, ref _pathIndex, _speed, NodeArrivalDistance, _obstacleAvoidance);
+    }
+
+    public void MoveTowards(Vector3 destination)
+    {
+        AgentMovement.MoveTowards(transform, destination, _speed, _obstacleAvoidance);
     }
 
     public bool HasLineOfSightTo(Vector3 target)
@@ -139,12 +157,9 @@ public class WolfAgent : MonoBehaviour, IGizmoProvider
             if (hunterObj != null) SetHunterTarget(hunterObj.transform);
         }
 
-        if (HunterTarget != null && Graph.Current != null)
-        {
-            Node node = Graph.Current.GetClosestNode(HunterTarget.position);
-            if (node != null && node.IsSafeZone) return true;
-        }
-        return false;
+        if (HunterTarget == null || Graph.Current == null) return false;
+
+        return Graph.Current.IsInSafeZone(HunterTarget.position);
     }
 
     public IEnumerable<GizmoData> GetGizmosToDraw()
